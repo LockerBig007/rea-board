@@ -173,6 +173,22 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
 }
 .tbtn{font:inherit;font-size:13px;display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--card);color:var(--ink-2);cursor:pointer;white-space:nowrap}
 .tbtn:hover{border-color:var(--accent);color:var(--accent)}
+/* ---- рисовалка ---- */
+#ink{position:fixed;inset:0;z-index:40;pointer-events:none;touch-action:none}
+#ink.live{pointer-events:auto;cursor:crosshair}
+.paintbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 14px;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+.paintbar.live{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:70;margin:0}
+.pgroup{display:flex;gap:6px;align-items:center}
+.pbtn{font:inherit;font-size:13px;padding:6px 12px;border-radius:9px;border:1px solid var(--line-2);background:var(--card);color:var(--ink);cursor:pointer;white-space:nowrap}
+.pbtn:hover{border-color:var(--accent)}
+.pbtn.go{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.pbtn.on{border-color:var(--accent);color:var(--accent);font-weight:600}
+.sw{width:28px;height:28px;border-radius:50%;border:2px solid transparent;box-shadow:inset 0 0 0 2px var(--card);cursor:pointer;padding:0}
+.sw.on{border-color:var(--ink)}
+.sz{width:30px;height:28px;border-radius:8px;border:1px solid var(--line-2);background:var(--card);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0}
+.sz i{display:block;border-radius:50%;background:var(--ink-2)}
+.sz.on{border-color:var(--accent)}
+.sz.on i{background:var(--accent)}
 /* ---- сцены эпох ---- */
 #scene{position:fixed;inset:0;pointer-events:none;z-index:55;overflow:hidden;opacity:0}
 .sc-sky{position:absolute;inset:0}
@@ -227,6 +243,7 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
       <a class="chip" href="#kak">Как считают</a>
     </nav>
     <button class="tbtn" id="themeBtn" type="button" title="Тема оформления">◐ Авто</button>
+    <button class="tbtn" id="fxToggle" type="button" title="Эффекты на кнопках">Эффекты</button>
   </div>
 </header>
 
@@ -378,10 +395,24 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
     </div>
   </section>
 
+  <hr class="rule">
+
+  <section id="risovat">
+    <h2>Порисовать</h2>
+    <p class="lede">Пять цветов и кисть. Рисовать можно поверх всей страницы: обвести свою пару, поставить стрелку, оставить записку соседу по парте. Рисунок остаётся в вашем браузере и виден только вам.</p>
+    <div class="paintbar" id="paintbar">
+      <button class="pbtn go" id="pOn" type="button">Рисовать</button>
+      <div class="pgroup" id="pColors"></div>
+      <div class="pgroup" id="pSizes"></div>
+      <button class="pbtn" id="pErase" type="button">Ластик</button>
+      <button class="pbtn" id="pClear" type="button">Стереть всё</button>
+    </div>
+    <p class="note" id="pNote">Пока кисть включена, страница не прокручивается пальцем — нажмите «Готово», и всё вернётся как было.</p>
+  </section>
+
   <footer>
     Данные учебного плана — из личного кабинета student.rea.ru, расписание — с rasp.rea.ru; оно обновляется автоматически раз в неделю.
     Страница неофициальная и университетом не поддерживается. Спорные баллы решаются с преподавателем и в дирекции, а не здесь.
-    <div style="margin-top:10px"><button class="fxbtn" id="fxToggle" type="button">Спокойный режим</button></div>
   </footer>
 </div>
 
@@ -832,8 +863,10 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
 
     function paintToggle(){
       if(!toggle) return;
-      toggle.textContent = quiet ? 'Включить анимации' : 'Спокойный режим';
-      toggle.title = quiet ? 'Вернуть эффекты на кнопках' : 'Выключить эффекты на кнопках';
+      toggle.textContent = quiet ? 'Спокойно' : 'Эффекты';
+      toggle.title = quiet
+        ? 'Эффекты выключены. Нажмите, чтобы вернуть.'
+        : 'Эффекты на кнопках включены. Нажмите, чтобы выключить.';
     }
     if(toggle){
       paintToggle();
@@ -1300,6 +1333,209 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
     if(prevBtn) prevBtn.addEventListener('click', function(){ if(on()) timeTravel(); });
     if(nextBtn) nextBtn.addEventListener('click', function(){ if(on()) rocket(nextBtn); });
     if(nowBtn) nowBtn.addEventListener('click', function(){ if(on()) cry(nowBtn); });
+  })();
+
+  /* ---------- рисовалка поверх страницы ---------- */
+  (function(){
+    var bar = document.getElementById('paintbar');
+    if(!bar) return;
+
+    var COLORS = ['#e4572e', '#f2b134', '#3fa34d', '#2f6fd0', '#9b3fb5'];
+    var SIZES = [4, 9, 18];
+    var KEY = 'rea1527.ink.v1';
+
+    var cv = document.createElement('canvas');
+    cv.id = 'ink';
+    cv.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(cv);
+    var ctx = cv.getContext('2d');
+
+    // Мазки храним в координатах документа, а холст держим размером с экран.
+    // Иначе на длинной странице расписания холст занял бы десятки мегабайт.
+    var strokes = [];
+    try {
+      var saved = JSON.parse(localStorage.getItem(KEY) || '[]');
+      if(Array.isArray(saved)) strokes = saved;
+    } catch(e){}
+
+    var live = false, erasing = false, color = COLORS[0], size = SIZES[1];
+    var drawing = null, dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    function fit(){
+      var w = window.innerWidth, h = window.innerHeight;
+      cv.width = Math.round(w * dpr);
+      cv.height = Math.round(h * dpr);
+      cv.style.width = w + 'px';
+      cv.style.height = h + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      redraw();
+    }
+
+    function line(st){
+      if(st.pts.length < 1) return;
+      var ox = window.scrollX || window.pageXOffset;
+      var oy = window.scrollY || window.pageYOffset;
+      ctx.strokeStyle = st.c;
+      ctx.lineWidth = st.w;
+      ctx.beginPath();
+      if(st.pts.length === 1){
+        ctx.arc(st.pts[0][0] - ox, st.pts[0][1] - oy, st.w / 2, 0, Math.PI * 2);
+        ctx.fillStyle = st.c;
+        ctx.fill();
+        return;
+      }
+      ctx.moveTo(st.pts[0][0] - ox, st.pts[0][1] - oy);
+      for(var i = 1; i < st.pts.length; i++) ctx.lineTo(st.pts[i][0] - ox, st.pts[i][1] - oy);
+      ctx.stroke();
+    }
+
+    var pending = false;
+    function redraw(){
+      ctx.clearRect(0, 0, cv.width, cv.height);
+      for(var i = 0; i < strokes.length; i++) line(strokes[i]);
+    }
+    function schedule(){
+      if(pending) return;
+      pending = true;
+      requestAnimationFrame(function(){ pending = false; redraw(); });
+    }
+
+    function save(){
+      try {
+        var data = JSON.stringify(strokes);
+        // Если рисунка набралось слишком много, выкидываем самые старые мазки,
+        // чтобы не упереться в лимит хранилища браузера.
+        while(data.length > 180000 && strokes.length > 1){
+          strokes.shift();
+          data = JSON.stringify(strokes);
+        }
+        localStorage.setItem(KEY, data);
+      } catch(e){}
+    }
+
+    function pagePos(e){
+      return [e.clientX + (window.scrollX || window.pageXOffset),
+              e.clientY + (window.scrollY || window.pageYOffset)];
+    }
+    function eraseAt(pt){
+      var before = strokes.length;
+      strokes = strokes.filter(function(st){
+        var r = st.w / 2 + 14;
+        for(var i = 0; i < st.pts.length; i++){
+          var dx = st.pts[i][0] - pt[0], dy = st.pts[i][1] - pt[1];
+          if(dx * dx + dy * dy < r * r) return false;
+        }
+        return true;
+      });
+      if(strokes.length !== before) schedule();
+    }
+
+    cv.addEventListener('pointerdown', function(e){
+      if(!live) return;
+      cv.setPointerCapture(e.pointerId);
+      var pt = pagePos(e);
+      if(erasing){ eraseAt(pt); return; }
+      drawing = { c: color, w: size, pts: [pt] };
+      strokes.push(drawing);
+      schedule();
+    });
+    cv.addEventListener('pointermove', function(e){
+      if(!live) return;
+      var pt = pagePos(e);
+      if(erasing){
+        if(e.buttons) eraseAt(pt);
+        return;
+      }
+      if(!drawing) return;
+      var last = drawing.pts[drawing.pts.length - 1];
+      if(Math.abs(pt[0] - last[0]) + Math.abs(pt[1] - last[1]) < 2) return;
+      drawing.pts.push(pt);
+      schedule();
+    });
+    function stop(){
+      if(drawing || erasing) save();
+      drawing = null;
+    }
+    cv.addEventListener('pointerup', stop);
+    cv.addEventListener('pointercancel', stop);
+    cv.addEventListener('pointerleave', stop);
+
+    window.addEventListener('resize', fit);
+    window.addEventListener('scroll', schedule, { passive: true });
+
+    /* панель */
+    var colorBox = document.getElementById('pColors');
+    var sizeBox = document.getElementById('pSizes');
+    var onBtn = document.getElementById('pOn');
+    var eraseBtn = document.getElementById('pErase');
+    var clearBtn = document.getElementById('pClear');
+    var note = document.getElementById('pNote');
+
+    COLORS.forEach(function(c, i){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'sw' + (i === 0 ? ' on' : '');
+      b.style.background = c;
+      b.setAttribute('aria-label', 'Цвет ' + (i + 1));
+      b.addEventListener('click', function(){
+        color = c;
+        erasing = false;
+        paint();
+      });
+      colorBox.appendChild(b);
+    });
+    SIZES.forEach(function(w, i){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'sz' + (i === 1 ? ' on' : '');
+      b.setAttribute('aria-label', 'Толщина ' + (i + 1));
+      var dot = document.createElement('i');
+      var d = Math.round(w * 0.7);
+      dot.style.width = d + 'px';
+      dot.style.height = d + 'px';
+      b.appendChild(dot);
+      b.addEventListener('click', function(){ size = w; paint(); });
+      sizeBox.appendChild(b);
+    });
+
+    function paint(){
+      Array.prototype.forEach.call(colorBox.children, function(b, i){
+        b.classList.toggle('on', !erasing && COLORS[i] === color);
+      });
+      Array.prototype.forEach.call(sizeBox.children, function(b, i){
+        b.classList.toggle('on', SIZES[i] === size);
+      });
+      eraseBtn.classList.toggle('on', erasing);
+      onBtn.textContent = live ? 'Готово' : 'Рисовать';
+      bar.classList.toggle('live', live);
+      cv.classList.toggle('live', live);
+      if(note){
+        note.textContent = live
+          ? 'Кисть включена: пальцем страница не листается, колесо мыши работает. «Готово» вернёт обычный режим.'
+          : 'Пока кисть включена, страница не прокручивается пальцем — нажмите «Готово», и всё вернётся как было.';
+      }
+    }
+
+    onBtn.addEventListener('click', function(){
+      live = !live;
+      if(live) fit();
+      paint();
+    });
+    eraseBtn.addEventListener('click', function(){
+      erasing = !erasing;
+      paint();
+    });
+    clearBtn.addEventListener('click', function(){
+      if(!strokes.length) return;
+      strokes = [];
+      save();
+      redraw();
+    });
+
+    fit();
+    paint();
   })();
 
   renderNow();

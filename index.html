@@ -171,6 +171,21 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
   .day{grid-template-columns:1fr;gap:8px}
   .slot{grid-template-columns:70px 1fr;gap:10px}
 }
+.tbtn{font:inherit;font-size:13px;display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--card);color:var(--ink-2);cursor:pointer;white-space:nowrap}
+.tbtn:hover{border-color:var(--accent);color:var(--accent)}
+/* ---- сцены эпох ---- */
+#scene{position:fixed;inset:0;pointer-events:none;z-index:55;overflow:hidden;opacity:0}
+.sc-sky{position:absolute;inset:0}
+.sc-ground{position:absolute;left:0;right:0;bottom:0;height:20%}
+.sc-cap{position:absolute;top:12%;left:0;right:0;text-align:center;font-family:var(--display);font-weight:600;font-size:clamp(19px,4.4vw,34px);letter-spacing:-.01em;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.55)}
+.sc-sub{position:absolute;top:12%;margin-top:2.6em;left:0;right:0;text-align:center;font-size:13px;color:rgba(255,255,255,.88);text-shadow:0 1px 8px rgba(0,0,0,.5)}
+.sc-a{position:absolute;line-height:1;will-change:transform;font-size:clamp(26px,5.6vw,48px)}
+.sc-p{position:absolute;line-height:1;font-size:clamp(24px,5vw,44px);opacity:.92}
+.sc-pyr{position:absolute;width:0;height:0;border-left:74px solid transparent;border-right:74px solid transparent;border-bottom:96px solid rgba(0,0,0,.3)}
+.sc-col{position:absolute;width:15px;border-radius:3px 3px 0 0;background:rgba(255,255,255,.6)}
+.sc-beam{position:absolute;width:0;height:0;border-left:30px solid transparent;border-right:30px solid transparent;border-top:240px solid rgba(130,255,190,.32);filter:blur(1px);transform-origin:top center}
+.sc-rope{position:absolute;height:2px;background:rgba(60,40,10,.55);transform-origin:left center}
+.fx-walk{position:fixed;pointer-events:none;line-height:1;font-size:30px;will-change:transform}
 /* ---- эффекты на чипах навигации ---- */
 @media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
 #fx{position:fixed;inset:0;pointer-events:none;z-index:60;overflow:hidden;contain:strict}
@@ -211,6 +226,7 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
       <a class="chip" href="#predmety">Предметы</a>
       <a class="chip" href="#kak">Как считают</a>
     </nav>
+    <button class="tbtn" id="themeBtn" type="button" title="Тема оформления">◐ Авто</button>
   </div>
 </header>
 
@@ -762,7 +778,46 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
     stamp.textContent = 'Неофициальная страница, собрана студентами по данным student.rea.ru и rasp.rea.ru. Расписание обновлено ' + B.updated + '; перед выходом из дома сверяйтесь с rasp.rea.ru.';
   }
 
-  /* ---------- эффекты на чипах ---------- */
+  /* ---------- тема оформления ---------- */
+  (function(){
+    var KEY = 'rea1527.theme.v1';
+    var btn = document.getElementById('themeBtn');
+    if(!btn) return;
+    var MODES = [
+      { v: 'auto',  label: '◐ Авто',    hint: 'Тема как в системе. Нажмите — светлая.' },
+      { v: 'light', label: '☀ Светлая', hint: 'Всегда светлая. Нажмите — тёмная.' },
+      { v: 'dark',  label: '☾ Тёмная',  hint: 'Всегда тёмная. Нажмите — как в системе.' }
+    ];
+    var i = 0;
+    try {
+      var saved = localStorage.getItem(KEY);
+      for(var k = 0; k < MODES.length; k++) if(MODES[k].v === saved) i = k;
+    } catch(e){}
+
+    function apply(){
+      var m = MODES[i];
+      if(m.v === 'auto') document.documentElement.removeAttribute('data-theme');
+      else document.documentElement.setAttribute('data-theme', m.v);
+      btn.textContent = m.label;
+      btn.title = m.hint;
+      btn.setAttribute('aria-label', 'Тема оформления: ' + m.label.slice(2));
+    }
+    apply();
+    btn.addEventListener('click', function(){
+      i = (i + 1) % MODES.length;
+      try { localStorage.setItem(KEY, MODES[i].v); } catch(e){}
+      apply();
+      if(btn.animate){
+        btn.animate([
+          { transform: 'rotate(0deg) scale(1)' },
+          { transform: 'rotate(180deg) scale(1.12)' },
+          { transform: 'rotate(360deg) scale(1)' }
+        ], { duration: 420, easing: 'cubic-bezier(.34,1.4,.64,1)' });
+      }
+    });
+  })();
+
+  /* ---------- эффекты на кнопках ---------- */
   (function(){
     var FXKEY = 'rea1527.fx.v1';
     var layer = document.getElementById('fx');
@@ -773,12 +828,12 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
     function reduced(){
       return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
     }
-    function on(){ return !quiet && !reduced(); }
+    function on(){ return !quiet && !reduced() && !!layer; }
 
     function paintToggle(){
       if(!toggle) return;
       toggle.textContent = quiet ? 'Включить анимации' : 'Спокойный режим';
-      toggle.title = quiet ? 'Вернуть эффекты на кнопках навигации' : 'Выключить эффекты на кнопках навигации';
+      toggle.title = quiet ? 'Вернуть эффекты на кнопках' : 'Выключить эффекты на кнопках';
     }
     if(toggle){
       paintToggle();
@@ -794,11 +849,17 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
       return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#888';
     }
     function rand(a, b){ return a + Math.random() * (b - a); }
+    function el(cls, parent){
+      var d = document.createElement('div');
+      if(cls) d.className = cls;
+      (parent || layer).appendChild(d);
+      return d;
+    }
 
-    // Копия чипа поверх страницы: настоящую кнопку не трогаем, вёрстка не едет.
-    function ghost(el){
-      var r = el.getBoundingClientRect();
-      var g = el.cloneNode(true);
+    // Копия кнопки поверх страницы: настоящую не трогаем, вёрстка не едет.
+    function ghost(node){
+      var r = node.getBoundingClientRect();
+      var g = node.cloneNode(true);
       g.removeAttribute('href');
       g.removeAttribute('id');
       g.classList.add('fx-ghost');
@@ -809,67 +870,75 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
       layer.appendChild(g);
       return g;
     }
-    function hide(el, ms){
-      el.style.visibility = 'hidden';
-      setTimeout(function(){ el.style.visibility = ''; pop(el); }, ms);
+    function hide(node, ms){
+      node.style.visibility = 'hidden';
+      setTimeout(function(){ node.style.visibility = ''; pop(node); }, ms);
     }
-    function pop(el){
-      if(!el.animate) return;
-      el.animate([
-        { transform: 'scale(.7)' },
-        { transform: 'scale(1.08)' },
-        { transform: 'scale(1)' }
+    function pop(node){
+      if(!node.animate) return;
+      node.animate([
+        { transform: 'scale(.7)' }, { transform: 'scale(1.08)' }, { transform: 'scale(1)' }
       ], { duration: 320, easing: 'cubic-bezier(.34,1.56,.64,1)' });
     }
+    function play(node, frames, opts, done){
+      if(!node.animate){ if(done) done(); return; }
+      var fired = false;
+      function fire(){ if(fired) return; fired = true; if(done) done(); }
+      var a = node.animate(frames, opts);
+      a.onfinish = fire;
+      // Во вкладке на фоне анимации замирают и onfinish не приходит.
+      // Без этой подстраховки копии кнопок остались бы висеть на странице,
+      // а сцена эпох больше не запустилась бы никогда.
+      setTimeout(fire, (opts.duration || 0) + (opts.delay || 0) + 400);
+      return a;
+    }
 
-    // «Сейчас» — отваливается и падает вниз
-    function fall(el){
-      var g = ghost(el), dir = Math.random() < 0.5 ? -1 : 1;
-      hide(el, 780);
-      var a = g.animate([
+    /* ===== чипы навигации ===== */
+
+    // «Сейчас» — отваливается и падает
+    function fall(node){
+      var g = ghost(node), dir = Math.random() < 0.5 ? -1 : 1;
+      hide(node, 780);
+      play(g, [
         { transform: 'translate(0,0) rotate(0deg)', opacity: 1, offset: 0 },
         { transform: 'translate(' + (dir * 6) + 'px,-10px) rotate(' + (dir * 5) + 'deg)', opacity: 1, offset: 0.18 },
         { transform: 'translate(' + (dir * 40) + 'px,' + (window.innerHeight + 80) + 'px) rotate(' + (dir * 190) + 'deg)', opacity: 0.15, offset: 1 }
-      ], { duration: 760, easing: 'cubic-bezier(.45,0,.75,.3)' });
-      a.onfinish = function(){ g.remove(); };
+      ], { duration: 760, easing: 'cubic-bezier(.45,0,.75,.3)' }, function(){ g.remove(); });
     }
 
     // «Расписание» — взрывается
-    function explode(el){
-      var r = el.getBoundingClientRect();
-      var g = ghost(el);
-      hide(el, 620);
-      var a = g.animate([
+    function explode(node){
+      var r = node.getBoundingClientRect();
+      var g = ghost(node);
+      hide(node, 620);
+      play(g, [
         { transform: 'scale(1)', opacity: 1 },
         { transform: 'scale(1.25)', opacity: 0.9, offset: 0.25 },
         { transform: 'scale(.2)', opacity: 0 }
-      ], { duration: 320, easing: 'ease-out' });
-      a.onfinish = function(){ g.remove(); };
-
+      ], { duration: 320, easing: 'ease-out' }, function(){ g.remove(); });
+      burst(r.left + r.width / 2, r.top + r.height / 2, 22);
+    }
+    function burst(cx, cy, n){
       var colors = [token('--accent'), token('--warn'), token('--ok'), token('--ink-2')];
-      var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
-      for(var i = 0; i < 22; i++){
-        (function(){
-          var p = document.createElement('div');
-          p.className = 'fx-part';
+      for(var i = 0; i < n; i++){
+        (function(i){
+          var p = el('fx-part');
           var size = rand(5, 11);
           p.style.width = size + 'px';
           p.style.height = size + 'px';
           p.style.left = (cx - size / 2) + 'px';
           p.style.top = (cy - size / 2) + 'px';
           p.style.background = colors[i % colors.length];
-          layer.appendChild(p);
           var ang = rand(0, Math.PI * 2), dist = rand(70, 190);
-          var pa = p.animate([
+          play(p, [
             { transform: 'translate(0,0) scale(1)', opacity: 1 },
             { transform: 'translate(' + (Math.cos(ang) * dist) + 'px,' + (Math.sin(ang) * dist + rand(40, 120)) + 'px) scale(.3) rotate(' + rand(-360, 360) + 'deg)', opacity: 0 }
-          ], { duration: rand(500, 850), easing: 'cubic-bezier(.2,.7,.4,1)' });
-          pa.onfinish = function(){ p.remove(); };
-        })();
+          ], { duration: rand(500, 850), easing: 'cubic-bezier(.2,.7,.4,1)' }, function(){ p.remove(); });
+        })(i);
       }
     }
 
-    // «Мои баллы» — трясёт всю страницу
+    // «Мои баллы» — трясёт страницу
     function shake(){
       ['header.top', '.wrap'].forEach(function(sel){
         var node = document.querySelector(sel);
@@ -881,23 +950,41 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
       });
     }
 
-    // «Доска» — кнопка убегает и возвращается
-    function dodge(el){
-      if(!el.animate) return;
-      var dx = rand(40, 90) * (Math.random() < 0.5 ? -1 : 1);
-      var dy = rand(18, 40) * (Math.random() < 0.5 ? -1 : 1);
-      el.animate([
-        { transform: 'translate(0,0) rotate(0deg)' },
-        { transform: 'translate(' + dx + 'px,' + dy + 'px) rotate(' + (dx > 0 ? 12 : -12) + 'deg)', offset: 0.35 },
-        { transform: 'translate(' + (-dx * 0.28) + 'px,' + (-dy * 0.3) + 'px) rotate(' + (dx > 0 ? -5 : 5) + 'deg)', offset: 0.7 },
-        { transform: 'translate(0,0) rotate(0deg)' }
-      ], { duration: 620, easing: 'cubic-bezier(.34,1.4,.64,1)' });
+    // «Доска» — кнопка превращается в человека, и он уходит
+    function walkAway(node){
+      var r = node.getBoundingClientRect();
+      var g = ghost(node);
+      hide(node, 2400);
+      play(g, [
+        { transform: 'scale(1) rotate(0deg)', opacity: 1 },
+        { transform: 'scale(.55) rotate(-8deg)', opacity: .5, offset: .6 },
+        { transform: 'scale(.2) rotate(-14deg)', opacity: 0 }
+      ], { duration: 380, easing: 'ease-in' }, function(){ g.remove(); });
+
+      var man = el('fx-walk');
+      man.textContent = '🚶';
+      man.style.left = (r.left + r.width / 2 - 15) + 'px';
+      man.style.top = (r.top + r.height / 2 - 18) + 'px';
+
+      var frames = [{ transform: 'scale(.2)', opacity: 0, offset: 0 },
+                    { transform: 'scale(1) translate(0,0) rotate(0deg)', opacity: 1, offset: .16 }];
+      // походка: покачивание на пути влево
+      var steps = 9;
+      for(var i = 1; i <= steps; i++){
+        var t = i / steps;
+        frames.push({
+          transform: 'scale(1) translate(' + (-(r.left + 90) * t) + 'px,' + (i % 2 ? -4 : 0) + 'px) rotate(' + (i % 2 ? -3 : 3) + 'deg)',
+          opacity: t > 0.82 ? 0 : 1,
+          offset: 0.16 + 0.84 * t
+        });
+      }
+      play(man, frames, { duration: 2200, easing: 'linear' }, function(){ man.remove(); });
     }
 
-    // «Предметы» — переворот кнопки и каскад строк таблицы
-    function flip(el){
-      if(el.animate){
-        el.animate([
+    // «Предметы» — переворот и каскад строк
+    function flip(node){
+      if(node.animate){
+        node.animate([
           { transform: 'perspective(400px) rotateX(0deg)' },
           { transform: 'perspective(400px) rotateX(360deg)' }
         ], { duration: 560, easing: 'cubic-bezier(.5,0,.3,1)' });
@@ -915,54 +1002,304 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
       });
     }
 
-    // «Как считают» — из кнопки сыплются баллы
-    function rain(el){
-      var r = el.getBoundingClientRect();
+    // «Как считают» — сыплются баллы
+    function rain(node){
+      var r = node.getBoundingClientRect();
       var vals = ['20', '20', '20', '40', '100', '50', '85', '70'];
       var colors = [token('--accent'), token('--ok'), token('--warn')];
       for(var i = 0; i < vals.length; i++){
         (function(i){
-          var n = document.createElement('div');
-          n.className = 'fx-num';
+          var n = el('fx-num');
           n.textContent = vals[i];
           n.style.left = (r.left + rand(4, Math.max(8, r.width - 16))) + 'px';
           n.style.top = (r.top + r.height / 2) + 'px';
           n.style.color = colors[i % colors.length];
           n.style.fontSize = rand(13, 22).toFixed(0) + 'px';
-          layer.appendChild(n);
-          var na = n.animate([
+          play(n, [
             { transform: 'translateY(0) scale(.6)', opacity: 0 },
             { transform: 'translateY(-' + rand(14, 30) + 'px) scale(1)', opacity: 1, offset: 0.2 },
             { transform: 'translateY(' + rand(120, 230) + 'px) scale(.85)', opacity: 0 }
-          ], { duration: rand(750, 1150), easing: 'cubic-bezier(.3,.6,.5,1)', delay: i * 55 });
-          na.onfinish = function(){ n.remove(); };
+          ], { duration: rand(750, 1150), easing: 'cubic-bezier(.3,.6,.5,1)', delay: i * 55 }, function(){ n.remove(); });
         })(i);
       }
-      if(el.animate){
-        el.animate([
-          { transform: 'scale(1)' },
-          { transform: 'scale(1.12)' },
-          { transform: 'scale(1)' }
-        ], { duration: 420, easing: 'ease-out' });
+      if(node.animate){
+        node.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.12)' }, { transform: 'scale(1)' }],
+          { duration: 420, easing: 'ease-out' });
       }
     }
 
-    var FX = {
-      '#now': fall,
-      '#rasp': explode,
-      '#ball': shake,
-      '#doska': dodge,
-      '#predmety': flip,
-      '#kak': rain
-    };
-
+    var CHIPFX = { '#now': fall, '#rasp': explode, '#ball': shake, '#doska': walkAway, '#predmety': flip, '#kak': rain };
     Array.prototype.forEach.call(document.querySelectorAll('nav.chips .chip'), function(a){
       a.addEventListener('click', function(){
-        if(!on() || !layer) return;
-        var fn = FX[a.getAttribute('href')];
+        if(!on()) return;
+        var fn = CHIPFX[a.getAttribute('href')];
         if(fn) fn(a);
       });
     });
+
+    /* ===== кнопки недели ===== */
+
+    // «Вперёд» — улетает на ракетной тяге
+    function rocket(node){
+      var r = node.getBoundingClientRect();
+      var g = ghost(node);
+      hide(node, 1200);
+      play(g, [
+        { transform: 'translate(0,0) rotate(0deg)', opacity: 1, offset: 0 },
+        { transform: 'translate(-14px,2px) rotate(-3deg)', opacity: 1, offset: .16 },
+        { transform: 'translate(' + (window.innerWidth + 200) + 'px,-60px) rotate(9deg)', opacity: .2, offset: 1 }
+      ], { duration: 900, easing: 'cubic-bezier(.6,0,.9,.4)' }, function(){ g.remove(); });
+
+      var flame = [token('--warn'), '#ff9a3c', '#ffd166', token('--danger')];
+      var t0 = performance.now();
+      (function trail(){
+        var k = (performance.now() - t0) / 700;
+        if(k > 1) return;
+        // хвост догоняет кнопку по её же траектории
+        var x = r.left + (window.innerWidth + 200) * Math.pow(Math.max(0, (k - .16) / .84), 2.2);
+        var y = r.top + r.height / 2 - 60 * Math.pow(Math.max(0, (k - .16) / .84), 2.2);
+        for(var i = 0; i < 2; i++){
+          var p = el('fx-part');
+          var size = rand(5, 13);
+          p.style.width = size + 'px';
+          p.style.height = size + 'px';
+          p.style.left = (x - 6) + 'px';
+          p.style.top = (y + rand(-6, 6)) + 'px';
+          p.style.background = flame[Math.floor(rand(0, flame.length))];
+          p.style.borderRadius = '50%';
+          play(p, [
+            { transform: 'translate(0,0) scale(1)', opacity: .95 },
+            { transform: 'translate(' + rand(-60, -10) + 'px,' + rand(-14, 20) + 'px) scale(.2)', opacity: 0 }
+          ], { duration: rand(320, 560), easing: 'ease-out' }, function(){ p.remove(); });
+        }
+        requestAnimationFrame(trail);
+      })();
+    }
+
+    // «Текущая неделя» — кнопка плачет
+    function cry(node){
+      var r = node.getBoundingClientRect();
+      if(node.animate){
+        node.animate([
+          { transform: 'rotate(0deg) translateY(0)' },
+          { transform: 'rotate(-2.5deg) translateY(3px)', offset: .3 },
+          { transform: 'rotate(2deg) translateY(2px)', offset: .6 },
+          { transform: 'rotate(0deg) translateY(0)' }
+        ], { duration: 1400, easing: 'ease-in-out' });
+      }
+      for(var i = 0; i < 9; i++){
+        (function(i){
+          var d = el('fx-num');
+          d.textContent = '💧';
+          d.style.fontSize = rand(11, 18).toFixed(0) + 'px';
+          d.style.left = (r.left + rand(8, Math.max(12, r.width - 12))) + 'px';
+          d.style.top = (r.top + r.height - 6) + 'px';
+          play(d, [
+            { transform: 'translateY(0) scale(.5)', opacity: 0 },
+            { transform: 'translateY(6px) scale(1)', opacity: 1, offset: .18 },
+            { transform: 'translateY(' + rand(70, 150) + 'px) scale(.8)', opacity: 0 }
+          ], { duration: rand(750, 1200), easing: 'cubic-bezier(.4,.1,.7,1)', delay: i * 120 }, function(){ d.remove(); });
+        })(i);
+      }
+    }
+
+    /* ===== «Назад» — путешествие по эпохам ===== */
+
+    var stage = null;
+    function getStage(){
+      if(!stage){
+        stage = document.createElement('div');
+        stage.id = 'scene';
+        stage.setAttribute('aria-hidden', 'true');
+        document.body.appendChild(stage);
+      }
+      return stage;
+    }
+    function node(cls, parent, text){
+      var d = document.createElement('div');
+      d.className = cls;
+      if(text != null) d.textContent = text;
+      parent.appendChild(d);
+      return d;
+    }
+    // Бегущий персонаж: справа налево или наоборот, с покачиванием.
+    function runner(box, glyph, opts){
+      var a = node('sc-a', box, glyph);
+      a.style.bottom = opts.bottom;
+      if(opts.size) a.style.fontSize = opts.size;
+      var W = window.innerWidth;
+      var from = opts.dir === 'ltr' ? -80 : W + 80;
+      var to = opts.dir === 'ltr' ? W + 80 : -80;
+      a.style.left = '0px';
+      var frames = [], steps = 12;
+      for(var i = 0; i <= steps; i++){
+        var t = i / steps;
+        frames.push({
+          transform: 'translateX(' + (from + (to - from) * t) + 'px) translateY(' + (i % 2 ? -5 : 0) + 'px) scaleX(' + (opts.flip ? -1 : 1) + ') rotate(' + (i % 2 ? -3 : 3) + 'deg)',
+          offset: t
+        });
+      }
+      var anim = a.animate(frames, { duration: opts.dur, delay: opts.delay || 0, easing: 'linear', fill: 'both' });
+      return { el: a, anim: anim, from: from, to: to };
+    }
+    function prop(box, cls, style, text){
+      var d = node(cls, box, text);
+      for(var k in style) d.style[k] = style[k];
+      return d;
+    }
+
+    var ERAS = [
+      {
+        name: 'Сад Эдемский', sub: 'до расписания оставалось совсем немного',
+        sky: 'linear-gradient(180deg,#ffd9a0 0%,#f6c98f 45%,#9fcf86 100%)', ground: '#6f9c54',
+        build: function(box){
+          prop(box, 'sc-p', { left: '8%', bottom: '18%' }, '🌳');
+          prop(box, 'sc-p', { right: '10%', bottom: '18%', fontSize: '3rem' }, '🌳');
+          prop(box, 'sc-p', { left: '46%', bottom: '19%', fontSize: '2.2rem' }, '🍎');
+          runner(box, '🚶', { bottom: '20%', dur: 3000, dir: 'ltr' });
+          runner(box, '🚶‍♀️', { bottom: '20%', dur: 3000, dir: 'ltr', delay: 320 });
+          runner(box, '🐍', { bottom: '19%', dur: 2600, dir: 'rtl', size: '1.9rem', delay: 500 });
+        }
+      },
+      {
+        name: 'Мезозой', sub: 'пары ещё не начались, но уже страшно',
+        sky: 'linear-gradient(180deg,#5b8a94 0%,#c98f5a 60%,#8a6b3f 100%)', ground: '#4f5f3a',
+        build: function(box){
+          prop(box, 'sc-p', { left: '12%', bottom: '18%', fontSize: '3.4rem' }, '🌋');
+          prop(box, 'sc-p', { right: '14%', bottom: '18%' }, '🌴');
+          runner(box, '🦕', { bottom: '20%', dur: 3400, dir: 'rtl', size: '3.2rem' });
+          runner(box, '🦖', { bottom: '20%', dur: 2600, dir: 'rtl', size: '3rem', delay: 600 });
+          var met = node('sc-a', box, '☄️');
+          met.style.top = '18%'; met.style.left = '0';
+          met.animate([
+            { transform: 'translate(' + (window.innerWidth + 60) + 'px,-60px) rotate(30deg)', opacity: 0 },
+            { transform: 'translate(' + (window.innerWidth * 0.55) + 'px,60px) rotate(30deg)', opacity: 1, offset: .35 },
+            { transform: 'translate(-80px,' + (window.innerHeight * 0.4) + 'px) rotate(30deg)', opacity: .2 }
+          ], { duration: 2200, delay: 700, easing: 'ease-in', fill: 'both' });
+        }
+      },
+      {
+        name: 'Древний Египет', sub: 'блоки тяжёлые, инопланетяне недружелюбные',
+        sky: 'linear-gradient(180deg,#f3c06b 0%,#e9a04f 50%,#d98b3f 100%)', ground: '#c89a5b',
+        build: function(box){
+          prop(box, 'sc-pyr', { right: '8%', bottom: '20%' });
+          prop(box, 'sc-pyr', { right: '26%', bottom: '20%', transform: 'scale(.7)', transformOrigin: 'bottom center' });
+          prop(box, 'sc-p', { left: '6%', bottom: '18%' }, '🌴');
+          // трое тащат блоки
+          for(var i = 0; i < 3; i++){
+            (function(i){
+              var man = runner(box, '🚶', { bottom: '20%', dur: 3200, dir: 'rtl', delay: i * 380 });
+              var blk = runner(box, '🧱', { bottom: '19%', dur: 3200, dir: 'rtl', size: '1.8rem', delay: i * 380 });
+              blk.el.style.marginLeft = '46px';
+              var rope = node('sc-rope', box);
+              rope.style.bottom = '22%';
+              rope.style.width = '44px';
+              rope.style.left = '0';
+              rope.animate([
+                { transform: 'translateX(' + (blk.from - 6) + 'px)' },
+                { transform: 'translateX(' + (blk.to - 6) + 'px)' }
+              ], { duration: 3200, delay: i * 380, easing: 'linear', fill: 'both' });
+            })(i);
+          }
+          // НЛО с лучом
+          var ufo = node('sc-a', box, '🛸');
+          ufo.style.top = '26%'; ufo.style.left = '0'; ufo.style.fontSize = '2.6rem';
+          ufo.animate([
+            { transform: 'translateX(' + (window.innerWidth + 60) + 'px)' },
+            { transform: 'translateX(' + (window.innerWidth * 0.42) + 'px)', offset: .45 },
+            { transform: 'translateX(' + (window.innerWidth * 0.34) + 'px)', offset: .75 },
+            { transform: 'translateX(-90px)' }
+          ], { duration: 3400, easing: 'cubic-bezier(.3,.6,.4,1)', fill: 'both' });
+
+          var beam = node('sc-beam', box);
+          beam.style.top = '34%';
+          beam.style.left = (window.innerWidth * 0.42) + 'px';
+          beam.animate([
+            { opacity: 0, transform: 'scaleY(.2)' },
+            { opacity: 0, transform: 'scaleY(.2)', offset: .42 },
+            { opacity: 1, transform: 'scaleY(1)', offset: .55 },
+            { opacity: 1, transform: 'scaleY(1)', offset: .78 },
+            { opacity: 0, transform: 'scaleY(.2)' }
+          ], { duration: 3400, easing: 'ease-out', fill: 'both' });
+
+          // одного забирают
+          var abd = node('sc-a', box, '🙋');
+          abd.style.bottom = '20%'; abd.style.left = (window.innerWidth * 0.42 - 14) + 'px';
+          abd.animate([
+            { transform: 'translateY(0) scale(1)', opacity: 0, offset: 0 },
+            { transform: 'translateY(0) scale(1)', opacity: 1, offset: .45 },
+            { transform: 'translateY(-' + (window.innerHeight * 0.32) + 'px) scale(.5)', opacity: 0, offset: .8 },
+            { transform: 'translateY(-' + (window.innerHeight * 0.32) + 'px) scale(.5)', opacity: 0, offset: 1 }
+          ], { duration: 3400, easing: 'ease-in', fill: 'both' });
+        }
+      },
+      {
+        name: 'Древний Рим', sub: 'дисциплина, колонны и ни одного автомата',
+        sky: 'linear-gradient(180deg,#a8c8e8 0%,#dce8f2 55%,#cbb99a 100%)', ground: '#9a8f7a',
+        build: function(box){
+          for(var i = 0; i < 5; i++){
+            prop(box, 'sc-col', { left: (8 + i * 8) + '%', bottom: '20%', height: (90 + (i % 2) * 20) + 'px' });
+          }
+          prop(box, 'sc-p', { right: '10%', bottom: '18%', fontSize: '3.2rem' }, '🏛️');
+          runner(box, '🛡️', { bottom: '20%', dur: 3000, dir: 'ltr', size: '2.4rem' });
+          runner(box, '⚔️', { bottom: '20%', dur: 3000, dir: 'ltr', size: '2.4rem', delay: 260 });
+          runner(box, '🛡️', { bottom: '20%', dur: 3000, dir: 'ltr', size: '2.4rem', delay: 520 });
+          runner(box, '🐎', { bottom: '20%', dur: 2500, dir: 'ltr', size: '3rem', delay: 900 });
+        }
+      },
+      {
+        name: 'Ледниковый период', sub: 'холодно, как в третьем корпусе в январе',
+        sky: 'linear-gradient(180deg,#bcd8ea 0%,#e6f1f7 60%,#f4fafd 100%)', ground: '#e8f2f7',
+        build: function(box){
+          prop(box, 'sc-p', { left: '14%', bottom: '19%', fontSize: '2.6rem' }, '🧊');
+          prop(box, 'sc-p', { right: '18%', bottom: '19%', fontSize: '2rem' }, '🧊');
+          runner(box, '🦣', { bottom: '20%', dur: 3600, dir: 'rtl', size: '3.4rem' });
+          runner(box, '🐺', { bottom: '20%', dur: 2800, dir: 'rtl', size: '2.2rem', delay: 700 });
+          for(var i = 0; i < 16; i++){
+            (function(i){
+              var f = node('sc-a', box, '❄️');
+              f.style.fontSize = rand(10, 20).toFixed(0) + 'px';
+              f.style.left = rand(0, 100).toFixed(1) + '%';
+              f.style.top = '-6%';
+              f.animate([
+                { transform: 'translateY(0) rotate(0deg)', opacity: .9 },
+                { transform: 'translateY(' + (window.innerHeight * 0.9) + 'px) rotate(' + rand(-200, 200) + 'deg)', opacity: .3 }
+              ], { duration: rand(2400, 3600), delay: i * 130, easing: 'linear', fill: 'both' });
+            })(i);
+          }
+        }
+      }
+    ];
+
+    var eraIdx = -1, playing = false;
+    function timeTravel(){
+      if(playing) return;
+      playing = true;
+      eraIdx = (eraIdx + 1) % ERAS.length;
+      var era = ERAS[eraIdx];
+      var box = getStage();
+      box.innerHTML = '';
+      var sky = node('sc-sky', box);
+      sky.style.background = era.sky;
+      var gr = node('sc-ground', box);
+      gr.style.background = era.ground;
+      node('sc-cap', box, era.name);
+      node('sc-sub', box, era.sub);
+      era.build(box);
+      play(box, [
+        { opacity: 0 }, { opacity: 1, offset: .1 }, { opacity: 1, offset: .82 }, { opacity: 0 }
+      ], { duration: 3600, easing: 'ease' }, function(){
+        box.innerHTML = '';
+        playing = false;
+      });
+    }
+
+    var prevBtn = document.getElementById('wkPrev');
+    var nextBtn = document.getElementById('wkNext');
+    var nowBtn = document.getElementById('wkNow');
+    if(prevBtn) prevBtn.addEventListener('click', function(){ if(on()) timeTravel(); });
+    if(nextBtn) nextBtn.addEventListener('click', function(){ if(on()) rocket(nextBtn); });
+    if(nowBtn) nowBtn.addEventListener('click', function(){ if(on()) cry(nowBtn); });
   })();
 
   renderNow();

@@ -189,6 +189,8 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
 .sz i{display:block;border-radius:50%;background:var(--ink-2)}
 .sz.on{border-color:var(--accent)}
 .sz.on i{background:var(--accent)}
+#wipe{position:fixed;left:0;bottom:0;width:22px;height:22px;padding:0;margin:0;border:0;background:transparent;opacity:0;z-index:72;cursor:default;-webkit-tap-highlight-color:transparent}
+#wipe:focus-visible{opacity:1;background:var(--danger);outline:2px solid var(--danger);outline-offset:2px}
 /* ---- доска почёта и подписи к рисункам ---- */
 .minibtn{font:inherit;font-size:11px;padding:2px 9px;border-radius:7px;border:1px solid var(--line-2);background:var(--card);color:var(--ink-3);cursor:pointer;margin-top:12px}
 .minibtn:hover{border-color:var(--accent);color:var(--accent)}
@@ -1580,7 +1582,11 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
     });
 
     // Галерее нужен доступ к мазкам, чтобы опубликовать рисунок.
-    window.REA_INK = { get: function(){ return strokes; } };
+    window.REA_INK = {
+      get: function(){ return strokes; },
+      clear: function(){ strokes = []; save(); redraw(); },
+      busy: function(){ return live; }
+    };
 
     fit();
     paint();
@@ -1955,6 +1961,45 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
 
     if(photoBtn) photoBtn.addEventListener('click', start);
     window.addEventListener('pagehide', closeShot);
+
+
+    /* ===== незаметная кнопка в углу: стирает все каракули ===== */
+    (function(){
+      var btn = document.createElement('button');
+      btn.id = 'wipe';
+      btn.type = 'button';
+      btn.setAttribute('aria-label', 'Стереть все опубликованные рисунки');
+      btn.title = '';
+      document.body.appendChild(btn);
+
+      // Держать, а не нажимать: кнопка невидимая и стоит в углу, куда на
+      // телефоне попадают большим пальцем. Случайное касание не должно
+      // стирать рисунки всей группы.
+      var timer = null;
+      function begin(e){
+        var bar = document.getElementById('paintbar');
+        if(bar && bar.classList.contains('live')) return; // панель кисти сейчас поверх угла
+        e.preventDefault();
+        clearTimeout(timer);
+        timer = setTimeout(wipe, 800);
+      }
+      function cancel(){ clearTimeout(timer); timer = null; }
+      btn.addEventListener('pointerdown', begin);
+      btn.addEventListener('pointerup', cancel);
+      btn.addEventListener('pointerleave', cancel);
+      btn.addEventListener('pointercancel', cancel);
+      btn.addEventListener('keydown', function(e){ if(e.key === 'Enter' || e.key === ' ') begin(e); });
+      btn.addEventListener('keyup', cancel);
+
+      function wipe(){
+        cancel();
+        if(ink && ink.clear) ink.clear();
+        if(!ready) return;
+        req('gallery?kind=eq.draw', { method: 'DELETE' })
+          .then(loadDrawings)
+          .catch(function(){});
+      }
+    })();
 
     fitPub();
     showHall();

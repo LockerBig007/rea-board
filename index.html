@@ -1,0 +1,729 @@
+<title>Борд группы 15.27Д</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Unbounded:wght@400;600&display=swap">
+<style>
+/* Layout: one column, sticky chip nav, content sections on a cool-paper ground; cards only where a block is a separate object. */
+:root{
+  --paper:#eef1f5; --card:#ffffff; --card-2:#f7f9fb;
+  --ink:#131923; --ink-2:#5a6676; --ink-3:#8a95a4;
+  --line:#dce1e9; --line-2:#c7cfda;
+  --accent:#2f5d8f; --accent-soft:#e4edf6; --accent-ink:#1d3f63;
+  --ok:#3c7a50; --ok-soft:#e2f0e6;
+  --warn:#9a6a12; --warn-soft:#f7edd8;
+  --danger:#a83b34; --danger-soft:#f8e4e2;
+  --shadow:0 1px 2px rgba(19,25,35,.06),0 8px 24px rgba(19,25,35,.05);
+  --display:'Unbounded','Golos Text',system-ui,sans-serif;
+  --body:'Golos Text',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0e131a; --card:#161d27; --card-2:#1b232e;
+  --ink:#e3e9f1; --ink-2:#98a4b4; --ink-3:#6d7988;
+  --line:#28313d; --line-2:#36414f;
+  --accent:#79a6d8; --accent-soft:#1a2836; --accent-ink:#a9c8e8;
+  --ok:#6db280; --ok-soft:#18271d;
+  --warn:#d3a351; --warn-soft:#2a2113;
+  --danger:#e0817a; --danger-soft:#2c1a19;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 8px 24px rgba(0,0,0,.28);
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --paper:#0e131a; --card:#161d27; --card-2:#1b232e;
+  --ink:#e3e9f1; --ink-2:#98a4b4; --ink-3:#6d7988;
+  --line:#28313d; --line-2:#36414f;
+  --accent:#79a6d8; --accent-soft:#1a2836; --accent-ink:#a9c8e8;
+  --ok:#6db280; --ok-soft:#18271d;
+  --warn:#d3a351; --warn-soft:#2a2113;
+  --danger:#e0817a; --danger-soft:#2c1a19;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 8px 24px rgba(0,0,0,.28);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;margin:0}
+.wrap{max-width:1060px;margin:0 auto;padding-inline:16px;padding-block:0 64px}
+h1,h2,h3{text-wrap:balance;margin:0}
+a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+
+/* header */
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top-in{max-width:1060px;margin:0 auto;padding:10px 16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.brand{font-family:var(--display);font-weight:600;font-size:15px;letter-spacing:-.01em;margin-right:auto}
+.brand span{color:var(--ink-3);font-weight:400}
+nav.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:inherit;font-size:13px;padding:5px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--card);color:var(--ink-2);cursor:pointer;text-decoration:none;white-space:nowrap}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+:root[data-theme="dark"] .chip.on,:root:not([data-theme="light"]) .chip.on{color:#0e131a}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .chip.on{color:#fff}}
+
+/* hero */
+.hero{padding-block:28px 6px}
+.kicker{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+h1{font-family:var(--display);font-weight:600;font-size:clamp(26px,5.2vw,40px);line-height:1.12;letter-spacing:-.02em;margin:8px 0 6px}
+.sub{color:var(--ink-2);max-width:62ch}
+.unofficial{margin-top:10px;font-size:12.5px;color:var(--ink-3)}
+
+section{padding-block:30px;scroll-margin-top:72px}
+section>h2{font-family:var(--display);font-weight:600;font-size:19px;letter-spacing:-.01em;margin-bottom:4px}
+.lede{color:var(--ink-2);font-size:14px;margin:0 0 16px;max-width:66ch}
+hr.rule{border:0;border-top:1px solid var(--line);margin:0}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+.pad{padding:16px}
+
+/* countdown row */
+.counts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.count{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.count b{display:block;font-family:var(--display);font-size:24px;font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums}
+.count small{display:block;color:var(--ink-2);font-size:12.5px;margin-top:3px}
+.count.hot b{color:var(--danger)}
+
+/* day list */
+.day{display:grid;grid-template-columns:104px 1fr;gap:14px;padding:13px 0;border-top:1px solid var(--line)}
+.day:first-child{border-top:0}
+.day.today{background:var(--accent-soft);margin-inline:-12px;padding-inline:12px;border-radius:10px;border-top-color:transparent}
+.dhead{font-size:13px;color:var(--ink-2);min-width:0}
+.dhead b{display:block;color:var(--ink);font-size:14px}
+.dhead .dt{font-variant-numeric:tabular-nums}
+.slots{display:flex;flex-direction:column;gap:8px;min-width:0}
+.slot{display:grid;grid-template-columns:86px 1fr;gap:12px;align-items:start;min-width:0}
+.slot .tm{font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums;padding-top:1px}
+.slot .tm i{display:block;color:var(--ink-3);font-style:normal;font-size:11.5px}
+.slot .bd{min-width:0}
+.slot .nm{font-weight:600;font-size:14.5px}
+.slot .mt{font-size:12.5px;color:var(--ink-2)}
+.tag{display:inline-block;font-size:11px;font-weight:600;padding:1px 7px;border-radius:999px;border:1px solid transparent;vertical-align:1px;margin-left:6px}
+.tag.z{background:var(--warn-soft);color:var(--warn);border-color:color-mix(in srgb,var(--warn) 35%,transparent)}
+.tag.r{background:var(--danger-soft);color:var(--danger);border-color:color-mix(in srgb,var(--danger) 35%,transparent)}
+.empty{color:var(--ink-3);font-size:13.5px;padding:2px 0}
+
+/* week nav */
+.wknav{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.btn{font:inherit;font-size:13px;padding:6px 12px;border-radius:9px;border:1px solid var(--line-2);background:var(--card);color:var(--ink);cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn:disabled{opacity:.4;cursor:default}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.wklabel{font-weight:600;font-size:14px;font-variant-numeric:tabular-nums}
+
+/* tables */
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--card);box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:560px}
+th,td{padding:10px 12px;text-align:left;border-top:1px solid var(--line)}
+thead th{border-top:0;background:var(--card-2);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);font-weight:600;white-space:nowrap}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tbody tr:hover{background:var(--card-2)}
+td.subj{font-weight:600;min-width:170px}
+td.subj small{display:block;font-weight:400;color:var(--ink-2);font-size:12px}
+
+/* calculator */
+input[type=number],input[type=text],input[type=date],select{font:inherit;font-size:13.5px;padding:6px 9px;border-radius:8px;border:1px solid var(--line-2);background:var(--card);color:var(--ink);width:100%;min-width:0}
+input:focus-visible,select:focus-visible,.btn:focus-visible,.chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+table input[type=number]{width:72px;text-align:right}
+.pill{display:inline-block;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:999px}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.bad{background:var(--danger-soft);color:var(--danger)}
+.pill.mute{background:var(--card-2);color:var(--ink-3)}
+.calcbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.calcsum{font-size:13.5px;color:var(--ink-2)}
+.calcsum b{color:var(--ink);font-variant-numeric:tabular-nums}
+
+/* board */
+.boardgrid{display:grid;gap:10px}
+.item{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;padding:12px 14px;background:var(--card);border:1px solid var(--line);border-radius:12px}
+.item.done{opacity:.55}
+.item.done .it{text-decoration:line-through}
+.it{font-weight:600;font-size:14px}
+.im{font-size:12.5px;color:var(--ink-2);margin-top:2px}
+.item input[type=checkbox]{width:17px;height:17px;margin-top:2px;accent-color:var(--accent)}
+.addrow{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:center}
+.addrow .full{grid-column:1/-1}
+@media (max-width:720px){.addrow{grid-template-columns:1fr 1fr}.addrow button{grid-column:1/-1}}
+.x{background:none;border:0;color:var(--ink-3);cursor:pointer;font-size:16px;line-height:1;padding:2px 4px}
+.x:hover{color:var(--danger)}
+.note{font-size:12.5px;color:var(--ink-3);margin-top:10px}
+
+/* scale */
+.scale{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.sc{border:1px solid var(--line);border-radius:11px;padding:11px 13px;background:var(--card)}
+.sc b{display:block;font-family:var(--display);font-size:17px;font-weight:600;font-variant-numeric:tabular-nums}
+.sc small{color:var(--ink-2);font-size:12.5px}
+.split{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:14px}
+.split>div{min-width:0}
+ul.tight{margin:8px 0 0;padding-left:18px}
+ul.tight li{margin-bottom:5px}
+dl.kv{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:13.5px}
+dl.kv dt{color:var(--ink-2);white-space:nowrap}
+dl.kv dd{margin:0;font-weight:500;font-variant-numeric:tabular-nums}
+code.cp{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:var(--card-2);border:1px solid var(--line);padding:1px 6px;border-radius:6px;word-break:break-all}
+footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px solid var(--line)}
+@media (max-width:560px){
+  .day{grid-template-columns:1fr;gap:8px}
+  .slot{grid-template-columns:70px 1fr;gap:10px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand">Борд 15.27Д <span>· 3-й семестр</span></div>
+    <nav class="chips">
+      <a class="chip" href="#now">Сейчас</a>
+      <a class="chip" href="#rasp">Расписание</a>
+      <a class="chip" href="#ball">Мои баллы</a>
+      <a class="chip" href="#doska">Доска</a>
+      <a class="chip" href="#predmety">Предметы</a>
+      <a class="chip" href="#kak">Как считают</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="kicker">15.27Д-С01/25б · 01.03.05 Статистика</div>
+    <h1>Что сегодня, сколько баллов и когда дедлайн</h1>
+    <p class="sub">Расписание всего семестра, калькулятор рейтинга по формуле РЭУ и общая доска дедлайнов. Одна страница на группу — открывайте с телефона.</p>
+    <p class="unofficial" id="stamp">Неофициальная страница, собрана студентами по данным student.rea.ru и rasp.rea.ru.</p>
+  </div>
+
+  <section id="now">
+    <h2>Сейчас</h2>
+    <p class="lede" id="nowLede">Загружаю…</p>
+    <div class="counts" id="counts"></div>
+    <div class="card pad" id="todayCard"></div>
+    <h3 style="font-size:15px;margin:22px 0 8px">Контрольные точки в расписании</h3>
+    <p class="lede" style="margin-bottom:10px">Зачёты и дифзачёты по этим предметам стоят до сессии — в январь они не уходят.</p>
+    <div class="tw"><table id="tblChecks"><thead><tr><th>Дата</th><th>Предмет</th><th>Форма</th><th>Время и место</th><th class="n">Осталось</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <hr class="rule">
+
+  <section id="rasp">
+    <h2>Расписание</h2>
+    <p class="lede">Весь семестр, 18 недель. Пустые дни пропущены.</p>
+    <div class="wknav">
+      <button class="btn" id="wkPrev" type="button">← Назад</button>
+      <span class="wklabel" id="wkLabel"></span>
+      <button class="btn" id="wkNext" type="button">Вперёд →</button>
+      <button class="btn pri" id="wkNow" type="button">Текущая неделя</button>
+    </div>
+    <div class="card pad" id="weekBody"></div>
+  </section>
+
+  <hr class="rule">
+
+  <section id="ball">
+    <h2>Мои баллы</h2>
+    <p class="lede">Впишите, сколько пар пропустили — посещаемость посчитается сама. Контроль и творческий заполняйте, когда узнаете у преподавателя. Всё хранится только в вашем браузере и никому не видно.</p>
+    <div class="calcbar">
+      <div class="calcsum" id="calcSum"></div>
+      <button class="btn" id="calcReset" type="button">Очистить</button>
+    </div>
+    <div class="tw"><table id="tblCalc">
+      <thead><tr>
+        <th>Предмет</th><th class="n">Пар</th><th class="n">Балл<br>за пару</th>
+        <th class="n">Пропущено</th><th class="n">Посещ.<br>/20</th>
+        <th class="n">Контроль<br>/20</th><th class="n">Творч.<br>/20</th>
+        <th class="n">До экз.<br>/60</th><th class="n">Нужно на экзамене</th>
+      </tr></thead><tbody></tbody>
+    </table></div>
+    <p class="note">«Нужно на экзамене» — сколько баллов из 40 добрать до тройки, четвёрки и пятёрки. Прочерк значит, что оценка уже недостижима даже при идеальном экзамене.</p>
+  </section>
+
+  <hr class="rule">
+
+  <section id="doska">
+    <h2>Доска группы</h2>
+    <p class="lede">Общий список дедлайнов и домашки. Добавлять и отмечать сделанным может любой, кто открыл страницу — логин не нужен.</p>
+    <div class="card pad" style="margin-bottom:14px">
+      <div class="addrow">
+        <input class="full" type="text" id="bText" maxlength="160" placeholder="Что сделать — например, «доклад по философии, тема на выбор»">
+        <select id="bSubj" aria-label="Предмет"></select>
+        <input type="date" id="bDue" aria-label="Срок">
+        <input type="text" id="bWho" maxlength="40" placeholder="Ваше имя" aria-label="Ваше имя">
+        <button class="btn pri" id="bAdd" type="button">Добавить</button>
+      </div>
+      <p class="note" id="boardNote">Подключаюсь к доске…</p>
+    </div>
+    <div class="boardgrid" id="boardList"></div>
+  </section>
+
+  <hr class="rule">
+
+  <section id="predmety">
+    <h2>Предметы семестра</h2>
+    <p class="lede">«Лимит пропусков» — сколько пар можно пропустить, чтобы посещаемость осталась не ниже 17 из 20. Одна пара антикоррупционной политики стоит как шесть пар дискретки.</p>
+    <div class="tw"><table id="tblSubj">
+      <thead><tr><th>Предмет</th><th>Форма контроля</th><th class="n">З.е.</th><th class="n">Часов</th><th class="n">Пар</th><th class="n">Балл за пару</th><th class="n">Лимит пропусков</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+    <p class="note">Число пар берётся из контактных часов учебного плана (2 часа = одна пара) и совпадает с расписанием. Иностранный идёт по подгруппам: в расписании больше слотов, чем пар у каждого студента.</p>
+  </section>
+
+  <hr class="rule">
+
+  <section id="kak">
+    <h2>Как считают баллы</h2>
+    <p class="lede">Балльно-рейтинговая система РЭУ: 100 баллов на дисциплину, из них 60 набираются в семестре и 40 даёт промежуточная аттестация.</p>
+
+    <div class="split">
+      <div>
+        <div class="card pad">
+          <h3 style="font-size:14px;margin-bottom:10px">Из чего складываются 100</h3>
+          <dl class="kv">
+            <dt>Работа на занятиях</dt><dd>20</dd>
+            <dt>Текущий и рубежный контроль</dt><dd>20</dd>
+            <dt>Творческий рейтинг</dt><dd>20</dd>
+            <dt>Промежуточная аттестация</dt><dd>40</dd>
+          </dl>
+          <p class="note" style="margin-top:12px">Балл за одно посещение = 20 разделить на число пар по дисциплине. Поэтому на коротком курсе каждая пара дороже.</p>
+        </div>
+        <div class="card pad" style="margin-top:14px">
+          <h3 style="font-size:14px;margin-bottom:10px">Про автомат</h3>
+          <p style="margin:0;font-size:13.5px">Порог «зачтено» и «удовлетворительно» — 50 баллов. Значит закрыть предмет без экзамена можно, набрав 50 из 60: за весь семестр теряется не больше 10 баллов.</p>
+          <p style="margin:10px 0 0;font-size:13.5px">На «хорошо» нужно 70, на «отлично» 85 — без экзаменационных 40 это недостижимо. Поэтому автомат выгоден там, где форма контроля — обычный зачёт и оценки в зачётке нет: иностранный, антикоррупционная политика, базы данных, физкультура. На экзаменах и дифзачётах автомат даёт тройку.</p>
+        </div>
+      </div>
+      <div>
+        <h3 style="font-size:14px;margin-bottom:10px">Шкала</h3>
+        <div class="scale">
+          <div class="sc"><b>85–100</b><small>Отлично · зачтено</small></div>
+          <div class="sc"><b>70–84</b><small>Хорошо · зачтено</small></div>
+          <div class="sc"><b>50–69</b><small>Удовлетворительно · зачтено</small></div>
+          <div class="sc"><b>0–49</b><small>Неудовлетворительно</small></div>
+        </div>
+        <h3 style="font-size:14px;margin:20px 0 10px">Календарь семестра</h3>
+        <div class="card pad">
+          <dl class="kv">
+            <dt>Теоретическое обучение</dt><dd>01.09 – 31.12.2026</dd>
+            <dt>Нерабочий день</dt><dd>04.11.2026</dd>
+            <dt>Экзаменационная сессия</dt><dd>09.01 – 27.01.2027</dd>
+            <dt>Каникулы</dt><dd>28.01 – 31.01.2027</dd>
+            <dt>Творческий рейтинг</dt><dd>закрыть до 31.12.2026</dd>
+          </dl>
+        </div>
+        <h3 style="font-size:14px;margin:20px 0 10px">Куда писать</h3>
+        <div class="card pad">
+          <dl class="kv">
+            <dt>Факультет</dt><dd>+7 495 800-12-00 доб. 1568, 1905</dd>
+            <dt>Почта факультета</dt><dd>fmei@rea.ru</dd>
+            <dt>Электронный деканат</dt><dd>dekanat@rea.ru</dd>
+            <dt>Приём документов</dt><dd>каб. 116, корпус 3</dd>
+          </dl>
+          <p class="note" style="margin-top:12px">Личный кабинет: <a href="https://student.rea.ru/rating/" target="_blank" rel="noopener">student.rea.ru/rating</a> — там видно, что уже проставили преподаватели. Расписание: <a href="https://rasp.rea.ru/" target="_blank" rel="noopener">rasp.rea.ru</a>. Уведомления шлёт бот <code class="cp">@REA_Student_info_bot</code>, привязывается в разделе «Личные данные».</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card pad" style="margin-top:14px">
+      <h3 style="font-size:14px;margin-bottom:10px">Три вещи, которые проще сделать сейчас, чем в январе</h3>
+      <ul class="tight" style="font-size:13.5px">
+        <li><b>Спросить про творческий рейтинг.</b> Это 20 баллов, которые не добираются в сессию. У каждого преподавателя свои условия — доклад, реферат, олимпиада, статья.</li>
+        <li><b>Проверять раздел «Рейтинг» раз в месяц.</b> Баллы за посещения вносят с задержкой, иногда не вносят вовсе. В октябре это чинится одним разговором, в январе — уже нет.</li>
+        <li><b>Не терять мелочь.</b> Разница между тройкой и четвёркой в прошлом семестре не раз укладывалась в один балл — это одно посещение.</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    Данные учебного плана — из личного кабинета student.rea.ru, расписание — с rasp.rea.ru; оно обновляется автоматически раз в неделю.
+    Страница неофициальная и университетом не поддерживается. Спорные баллы решаются с преподавателем и в дирекции, а не здесь.
+  </footer>
+</div>
+
+<script src="config.js"></script>
+<script src="data.js"></script>
+<script>
+(function(){
+  var B = window.BOARD;
+  if(!B){ return; }
+  var SUB = B.subjects, DAYS = B.days;
+  var DOWS = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+  var MON = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+
+  function pd(s){ var p = s.split('.'); return new Date(+p[2], +p[1]-1, +p[0]); }
+  function today(){ var n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); }
+  function dkey(dt){ return dt.getTime(); }
+  function fmt(s){ var d = pd(s); return d.getDate() + ' ' + MON[d.getMonth()]; }
+  function daysBetween(a,b){ return Math.round((b-a)/86400000); }
+  function plural(n, one, few, many){
+    var m10 = n % 10, m100 = n % 100;
+    if(m10===1 && m100!==11) return one;
+    if(m10>=2 && m10<=4 && (m100<10 || m100>=20)) return few;
+    return many;
+  }
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function sname(i, x){ return i>=0 ? SUB[i].short : (x||'—'); }
+  function slongname(i, x){ return i>=0 ? SUB[i].name : (x||'—'); }
+  function isCheck(k){ return /зачет|зачёт|экзамен/i.test(k); }
+  function isRetake(k){ return /пересдач/i.test(k); }
+
+  var TODAY = today();
+
+  /* ---------- контрольные точки ---------- */
+  var checks = [];
+  DAYS.forEach(function(d){
+    d.s.forEach(function(sl){
+      if(isCheck(sl.k) && !isRetake(sl.k)) checks.push({d:d.d, sl:sl});
+    });
+  });
+
+  /* ---------- Сейчас ---------- */
+  function renderNow(){
+    var lede = document.getElementById('nowLede');
+    var sd = pd(B.sem.start), ed = pd(B.sem.end), ss = pd(B.sem.sessStart), se = pd(B.sem.sessEnd);
+    var future = DAYS.filter(function(d){ return dkey(pd(d.d)) >= dkey(TODAY); });
+    var todayRec = DAYS.filter(function(d){ return dkey(pd(d.d)) === dkey(TODAY); })[0];
+    var nextRec = future.filter(function(d){ return dkey(pd(d.d)) > dkey(TODAY); })[0];
+
+    var wk = todayRec ? todayRec.w : (nextRec ? nextRec.w : null);
+    var dLeft = daysBetween(TODAY, ed), dSess = daysBetween(TODAY, ss);
+    var nextCheck = checks.filter(function(c){ return dkey(pd(c.d)) >= dkey(TODAY); })[0];
+
+    if(dLeft >= 0){
+      lede.textContent = (wk ? wk + '-я учебная неделя. ' : '') + 'Семестр идёт до 31 декабря, дальше сессия.';
+    } else if(daysBetween(TODAY, se) >= 0){
+      lede.textContent = 'Идёт экзаменационная сессия, 9–27 января.';
+    } else {
+      lede.textContent = 'Семестр и сессия закончились. Расписание ниже — архив 3-го семестра.';
+    }
+
+    var cells = [];
+    if(dLeft >= 0) cells.push({v:dLeft, l:'дн. до конца семестра', hot:dLeft<=14, unit:true});
+    if(dSess >= 0) cells.push({v:dSess, l:'дн. до сессии', hot:dSess<=14, unit:true});
+    if(nextCheck){
+      var nd = daysBetween(TODAY, pd(nextCheck.d));
+      cells.push({v:nd, l:'дн. до «' + sname(nextCheck.sl.i, nextCheck.sl.x) + '»', hot:nd<=7, unit:true});
+    }
+    var totalPairs = future.reduce(function(a,d){ return a + d.s.filter(function(s){ return !isRetake(s.k); }).length; }, 0);
+    if(totalPairs) cells.push({v:totalPairs, l:'пар осталось в семестре', hot:false, unit:false});
+
+    document.getElementById('counts').innerHTML = cells.map(function(c){
+      return '<div class="count' + (c.hot?' hot':'') + '"><b class="num">' + c.v + '</b><small>' + esc(c.l) + '</small></div>';
+    }).join('');
+
+    var card = document.getElementById('todayCard');
+    var html = '';
+    if(todayRec && todayRec.s.length){
+      html = '<h3 style="font-size:15px;margin-bottom:10px">Сегодня, ' + fmt(todayRec.d) + '</h3>' + slotsHtml(todayRec.s);
+    } else if(nextRec){
+      html = '<h3 style="font-size:15px;margin-bottom:4px">Сегодня пар нет</h3>' +
+             '<p class="lede" style="margin-bottom:10px">Ближайший учебный день — ' + DOWS[pd(nextRec.d).getDay()].toLowerCase() + ', ' + fmt(nextRec.d) + '.</p>' +
+             slotsHtml(nextRec.s);
+    } else {
+      html = '<h3 style="font-size:15px;margin-bottom:4px">Занятий по расписанию больше нет</h3><p class="empty">3-й семестр закрыт.</p>';
+    }
+    card.innerHTML = html;
+
+    var tb = document.querySelector('#tblChecks tbody');
+    tb.innerHTML = checks.map(function(c){
+      var left = daysBetween(TODAY, pd(c.d));
+      var lbl = left < 0 ? 'прошло' : left === 0 ? 'сегодня' : left + ' ' + plural(left,'день','дня','дней');
+      return '<tr' + (left<0?' style="opacity:.5"':'') + '><td class="n">' + c.d.slice(0,5) + '</td>' +
+        '<td class="subj">' + esc(slongname(c.sl.i, c.sl.x)) + '</td>' +
+        '<td>' + esc(c.sl.k) + '</td>' +
+        '<td>' + esc(c.sl.t + ' · ' + (c.sl.p || '—')) + '</td>' +
+        '<td class="n">' + lbl + '</td></tr>';
+    }).join('');
+  }
+
+  function slotsHtml(slots){
+    return '<div class="slots">' + slots.map(function(s){
+      var tag = '';
+      if(isRetake(s.k)) tag = '<span class="tag r">пересдача</span>';
+      else if(isCheck(s.k)) tag = '<span class="tag z">' + esc(s.k) + '</span>';
+      var tparts = (s.t || '').split('–');
+      return '<div class="slot"><div class="tm">' + esc(tparts[0]||'') + '<i>' + esc(tparts[1]||'') + '</i></div>' +
+        '<div class="bd"><div class="nm">' + esc(slongname(s.i, s.x)) + tag + '</div>' +
+        '<div class="mt">' + s.n + '-я пара · ' + esc(isCheck(s.k)?'':(s.k + ' · ')) + esc(s.p || 'аудитория уточняется') + '</div></div></div>';
+    }).join('') + '</div>';
+  }
+
+  /* ---------- Расписание ---------- */
+  var weeks = [];
+  DAYS.forEach(function(d){ if(weeks.indexOf(d.w) < 0) weeks.push(d.w); });
+  weeks.sort(function(a,b){ return a-b; });
+  function currentWeek(){
+    var t = dkey(TODAY);
+    for(var i=0;i<DAYS.length;i++){ if(dkey(pd(DAYS[i].d)) >= t) return DAYS[i].w; }
+    return weeks[weeks.length-1];
+  }
+  var wkIdx = Math.max(0, weeks.indexOf(currentWeek()));
+
+  function renderWeek(){
+    var w = weeks[wkIdx];
+    var ds = DAYS.filter(function(d){ return d.w === w; });
+    document.getElementById('wkLabel').textContent = w + '-я неделя · ' + fmt(ds[0].d) + ' – ' + fmt(ds[ds.length-1].d);
+    document.getElementById('wkPrev').disabled = wkIdx === 0;
+    document.getElementById('wkNext').disabled = wkIdx === weeks.length - 1;
+    document.getElementById('weekBody').innerHTML = ds.map(function(d){
+      var dt = pd(d.d), isT = dkey(dt) === dkey(TODAY);
+      return '<div class="day' + (isT?' today':'') + '">' +
+        '<div class="dhead"><b>' + DOWS[dt.getDay()] + (isT?', сегодня':'') + '</b><span class="dt">' + esc(d.d) + '</span></div>' +
+        slotsHtml(d.s) + '</div>';
+    }).join('');
+  }
+  document.getElementById('wkPrev').onclick = function(){ if(wkIdx>0){ wkIdx--; renderWeek(); } };
+  document.getElementById('wkNext').onclick = function(){ if(wkIdx<weeks.length-1){ wkIdx++; renderWeek(); } };
+  document.getElementById('wkNow').onclick = function(){ wkIdx = Math.max(0, weeks.indexOf(currentWeek())); renderWeek(); };
+
+  /* ---------- Калькулятор ---------- */
+  var KEY = 'rea1527.calc.v1';
+  var state = {};
+  try { state = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch(e){ state = {}; }
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){} }
+
+  function perPair(s){ return 20 / s.pairs; }
+  function limit(s){ return Math.floor(s.pairs * 0.15); }
+
+  function renderCalc(){
+    var tb = document.querySelector('#tblCalc tbody');
+    tb.innerHTML = SUB.map(function(s, i){
+      var st = state[i] || {};
+      return '<tr data-i="' + i + '">' +
+        '<td class="subj">' + esc(s.short) + '<small>' + esc(s.form) + '</small></td>' +
+        '<td class="n">' + s.pairs + '</td>' +
+        '<td class="n">' + perPair(s).toFixed(2) + '</td>' +
+        '<td class="n"><input type="number" id="miss' + i + '" min="0" max="' + s.pairs + '" step="1" value="' + (st.m != null ? st.m : 0) + '" data-f="m" aria-label="Пропущено пар, ' + esc(s.short) + '"></td>' +
+        '<td class="n" data-c="att"></td>' +
+        '<td class="n"><input type="number" id="ctl' + i + '" min="0" max="20" step="0.5" value="' + (st.c != null ? st.c : '') + '" placeholder="0" data-f="c" aria-label="Текущий контроль, ' + esc(s.short) + '"></td>' +
+        '<td class="n"><input type="number" id="tvr' + i + '" min="0" max="20" step="0.5" value="' + (st.t != null ? st.t : '') + '" placeholder="0" data-f="t" aria-label="Творческий рейтинг, ' + esc(s.short) + '"></td>' +
+        '<td class="n" data-c="sum"></td>' +
+        '<td class="n" data-c="need"></td>' +
+      '</tr>';
+    }).join('');
+    tb.addEventListener('input', function(e){
+      var inp = e.target;
+      if(inp.tagName !== 'INPUT') return;
+      var tr = inp.closest('tr'), i = +tr.dataset.i, f = inp.dataset.f;
+      state[i] = state[i] || {};
+      var v = inp.value === '' ? null : Math.max(0, +inp.value);
+      state[i][f] = v;
+      save(); recalc();
+    });
+    recalc();
+  }
+
+  function recalc(){
+    var totalMiss = 0, totalLost = 0;
+    SUB.forEach(function(s, i){
+      var tr = document.querySelector('#tblCalc tbody tr[data-i="' + i + '"]');
+      if(!tr) return;
+      var st = state[i] || {};
+      var miss = Math.min(s.pairs, Math.max(0, +(st.m || 0)));
+      var att = 20 * (s.pairs - miss) / s.pairs;
+      var c = Math.min(20, Math.max(0, +(st.c || 0)));
+      var t = Math.min(20, Math.max(0, +(st.t || 0)));
+      var sum = att + c + t;
+      totalMiss += miss; totalLost += 20 - att;
+
+      var lim = limit(s);
+      var cls = miss === 0 ? 'ok' : (miss <= lim ? 'warn' : 'bad');
+      tr.querySelector('[data-c="att"]').innerHTML = '<span class="pill ' + cls + '">' + att.toFixed(1) + '</span>';
+
+      var scls = sum >= 50 ? 'ok' : (sum >= 35 ? 'warn' : 'mute');
+      tr.querySelector('[data-c="sum"]').innerHTML = '<span class="pill ' + scls + '">' + sum.toFixed(1) + '</span>';
+
+      function need(target){
+        var n = target - sum;
+        if(n <= 0) return '<span class="pill ok">есть</span>';
+        if(n > 40) return '—';
+        return Math.ceil(n * 10) / 10;
+      }
+      tr.querySelector('[data-c="need"]').innerHTML =
+        '<span style="font-size:12px;color:var(--ink-3)">3:</span> ' + need(50) +
+        ' <span style="font-size:12px;color:var(--ink-3)">4:</span> ' + need(70) +
+        ' <span style="font-size:12px;color:var(--ink-3)">5:</span> ' + need(85);
+    });
+    document.getElementById('calcSum').innerHTML =
+      'Пропущено пар: <b class="num">' + totalMiss + '</b> · потеряно баллов посещаемости: <b class="num">' + totalLost.toFixed(1) + '</b> из ' + (SUB.length * 20);
+  }
+  document.getElementById('calcReset').onclick = function(){
+    state = {}; save(); renderCalc();
+  };
+
+  /* ---------- Справочник предметов ---------- */
+  (function(){
+    var rows = SUB.slice().sort(function(a,b){ return (20/b.pairs) - (20/a.pairs); });
+    document.querySelector('#tblSubj tbody').innerHTML = rows.map(function(s){
+      var pp = 20 / s.pairs, lim = Math.floor(s.pairs * 0.15);
+      var cls = pp >= 2 ? 'bad' : (pp >= 1 ? 'warn' : 'ok');
+      return '<tr><td class="subj">' + esc(s.name) + '</td><td>' + esc(s.form) + '</td>' +
+        '<td class="n">' + (s.zet || '—') + '</td><td class="n">' + s.h + '</td><td class="n">' + s.pairs + '</td>' +
+        '<td class="n"><span class="pill ' + cls + '">' + pp.toFixed(2) + '</span></td>' +
+        '<td class="n">' + lim + '</td></tr>';
+    }).join('');
+  })();
+
+  /* ---------- Доска (Supabase) ---------- */
+  (function(){
+    var cfg = window.REA_CONFIG || {};
+    var API = (cfg.supabaseUrl || '').replace(/\/+$/, '');
+    var KEY = cfg.supabaseAnonKey || '';
+    var ready = !!(API && KEY);
+
+    var sel = document.getElementById('bSubj');
+    sel.innerHTML = '<option value="-1">Без предмета</option>' + SUB.map(function(s,i){
+      return '<option value="' + i + '">' + esc(s.short) + '</option>';
+    }).join('');
+
+    var note = document.getElementById('boardNote');
+    var list = document.getElementById('boardList');
+    var addBtn = document.getElementById('bAdd');
+    var whoInp = document.getElementById('bWho');
+    var items = [], busy = false;
+
+    var MEKEY = 'rea1527.me.v1';
+    var me = '';
+    try { me = localStorage.getItem(MEKEY) || ''; } catch(e){}
+    if(!me){
+      me = 'u' + Math.random().toString(36).slice(2,10);
+      try { localStorage.setItem(MEKEY, me); } catch(e){}
+    }
+    var NAMEKEY = 'rea1527.name.v1';
+    try { whoInp.value = localStorage.getItem(NAMEKEY) || ''; } catch(e){}
+    whoInp.addEventListener('change', function(){
+      try { localStorage.setItem(NAMEKEY, whoInp.value.trim()); } catch(e){}
+    });
+
+    function req(path, opts){
+      opts = opts || {};
+      opts.headers = Object.assign({
+        'apikey': KEY,
+        'Authorization': 'Bearer ' + KEY,
+        'Content-Type': 'application/json'
+      }, opts.headers || {});
+      return fetch(API + '/rest/v1/' + path, opts).then(function(r){
+        if(!r.ok) return r.text().then(function(t){ throw new Error(r.status + ' ' + t); });
+        return r.status === 204 ? null : r.json();
+      });
+    }
+
+    function splitAuthor(a){
+      var i = (a || '').indexOf('\u0007');
+      return i < 0 ? { id: a || '', name: '' } : { id: a.slice(0, i), name: a.slice(i + 1) };
+    }
+
+    function paint(){
+      if(!ready){
+        list.innerHTML = '<div class="card pad"><div class="it">Доска ещё не подключена</div><div class="im">Владельцу сайта: заполните config.js — два поля из настроек проекта Supabase. Остальные разделы страницы работают и без этого.</div></div>';
+        return;
+      }
+      if(!items.length){
+        list.innerHTML = '<div class="card pad"><div class="it">Пока пусто</div><div class="im">Добавляйте контрольные, доклады и сроки сдачи — всё, что группе легко забыть. Запись увидят все, кто откроет страницу.</div></div>';
+        return;
+      }
+      list.innerHTML = items.slice().sort(function(a,b){
+        if(!!a.done !== !!b.done) return a.done ? 1 : -1;
+        var ad = a.due || '9999-99-99', bd = b.due || '9999-99-99';
+        if(ad !== bd) return ad < bd ? -1 : 1;
+        return (b.created_at || '') < (a.created_at || '') ? -1 : 1;
+      }).map(function(it){
+        var who = splitAuthor(it.author);
+        var meta = [];
+        if(it.subject != null && it.subject >= 0 && SUB[it.subject]) meta.push(SUB[it.subject].short);
+        if(it.due){
+          var p = it.due.split('-'), dd = new Date(+p[0], +p[1]-1, +p[2]);
+          var left = Math.round((dd - TODAY) / 86400000);
+          var lbl = left < 0 ? 'просрочено' : left === 0 ? 'сегодня' : 'через ' + left + ' ' + plural(left,'день','дня','дней');
+          meta.push(dd.getDate() + ' ' + MON[dd.getMonth()] + ' · ' + lbl);
+        } else meta.push('без срока');
+        if(who.name) meta.push(who.name);
+        var mine = who.id === me;
+        return '<div class="item' + (it.done ? ' done' : '') + '" data-id="' + esc(it.id) + '">' +
+          '<input type="checkbox" ' + (it.done ? 'checked' : '') + ' aria-label="Выполнено">' +
+          '<div><div class="it">' + esc(it.text) + '</div><div class="im">' + esc(meta.join(' · ')) + '</div></div>' +
+          (mine ? '<button class="x" type="button" title="Удалить" aria-label="Удалить">✕</button>' : '<span></span>') +
+        '</div>';
+      }).join('');
+    }
+
+    function load(){
+      if(!ready || busy) return;
+      busy = true;
+      req('deadlines?select=*').then(function(rows){
+        items = rows || [];
+        note.textContent = 'Доска общая: записи видят все, кто откроет страницу. Удалить можно только то, что добавили вы с этого устройства.';
+        paint();
+      }).catch(function(e){
+        note.textContent = 'Доска не отвечает — остальная страница работает. ' + e.message;
+      }).then(function(){ busy = false; });
+    }
+
+    list.addEventListener('click', function(e){
+      if(!ready) return;
+      var row = e.target.closest('.item'); if(!row) return;
+      var id = row.dataset.id;
+      var rec = items.filter(function(x){ return x.id === id; })[0];
+      if(!rec) return;
+      if(e.target.matches('input[type=checkbox]')){
+        var v = e.target.checked;
+        rec.done = v; paint();
+        req('deadlines?id=eq.' + encodeURIComponent(id), {
+          method: 'PATCH', body: JSON.stringify({ done: v })
+        }).catch(function(){ load(); });
+      } else if(e.target.matches('.x')){
+        items = items.filter(function(x){ return x.id !== id; }); paint();
+        req('deadlines?id=eq.' + encodeURIComponent(id), { method: 'DELETE' }).catch(function(){ load(); });
+      }
+    });
+
+    addBtn.onclick = function(){
+      if(!ready) return;
+      var text = document.getElementById('bText').value.trim();
+      if(!text) return;
+      var subj = +document.getElementById('bSubj').value;
+      var due = document.getElementById('bDue').value || null;
+      var name = whoInp.value.trim().slice(0, 30);
+      try { localStorage.setItem(NAMEKEY, name); } catch(e){}
+      addBtn.disabled = true;
+      req('deadlines', {
+        method: 'POST',
+        headers: { 'Prefer': 'return=representation' },
+        body: JSON.stringify({ text: text, subject: subj, due: due, done: false, author: me + '\u0007' + name })
+      }).then(function(rows){
+        if(rows && rows[0]) items.push(rows[0]);
+        document.getElementById('bText').value = '';
+        document.getElementById('bDue').value = '';
+        paint();
+      }).catch(function(e){
+        note.textContent = 'Не удалось сохранить: ' + e.message;
+      }).then(function(){ addBtn.disabled = false; });
+    };
+
+    paint();
+    if(!ready){
+      note.textContent = 'Доска подключается через Supabase — пока в config.js нет адреса и ключа, здесь пусто.';
+      addBtn.disabled = true;
+      document.getElementById('bText').disabled = true;
+      return;
+    }
+    load();
+    setInterval(load, 60000);
+    document.addEventListener('visibilitychange', function(){ if(!document.hidden) load(); });
+  })();
+
+
+  /* ---------- nav highlight ---------- */
+  (function(){
+    var links = [].slice.call(document.querySelectorAll('nav.chips .chip'));
+    var secs = links.map(function(a){ return document.querySelector(a.getAttribute('href')); });
+    function upd(){
+      var y = window.scrollY + 120, best = 0;
+      secs.forEach(function(s, i){ if(s && s.offsetTop <= y) best = i; });
+      links.forEach(function(a, i){ a.classList.toggle('on', i === best); });
+    }
+    window.addEventListener('scroll', upd, { passive: true });
+    upd();
+  })();
+
+  var stamp = document.getElementById('stamp');
+  if(stamp && B.updated){
+    stamp.textContent = 'Неофициальная страница, собрана студентами по данным student.rea.ru и rasp.rea.ru. Расписание обновлено ' + B.updated + '; перед выходом из дома сверяйтесь с rasp.rea.ru.';
+  }
+
+  renderNow();
+  renderWeek();
+  renderCalc();
+})();
+</script>

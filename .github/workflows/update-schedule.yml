@@ -1,0 +1,46 @@
+# Раз в неделю заново тянет расписание с rasp.rea.ru и коммитит data.js.
+# GitHub Pages публикует ветку main, поэтому коммит сам обновляет сайт.
+
+name: Обновить расписание
+
+on:
+  schedule:
+    - cron: "0 3 * * 1"   # понедельник, 06:00 МСК
+  workflow_dispatch:       # и кнопкой из вкладки Actions
+
+permissions:
+  contents: write
+
+concurrency:
+  group: schedule
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: pip install -q requests
+
+      # Скрипт не перезаписывает data.js, если сайт вуза ответил мусором,
+      # так что упавшая неделя оставит на сайте прошлое расписание, а не пустоту.
+      - name: Собрать data.js
+        run: python build_schedule.py
+
+      - name: Закоммитить, если изменилось
+        run: |
+          if git diff --quiet -- data.js; then
+            echo "Расписание не менялось"
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data.js
+          git commit -m "Расписание на $(date -u +%d.%m.%Y)"
+          git push

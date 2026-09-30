@@ -189,6 +189,22 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
 .sz i{display:block;border-radius:50%;background:var(--ink-2)}
 .sz.on{border-color:var(--accent)}
 .sz.on i{background:var(--accent)}
+/* ---- галерея и доска почёта ---- */
+.minibtn{font:inherit;font-size:11px;padding:2px 9px;border-radius:7px;border:1px solid var(--line-2);background:var(--card);color:var(--ink-3);cursor:pointer;margin-top:12px}
+.minibtn:hover{border-color:var(--accent);color:var(--accent)}
+.pubrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.pubrow input{max-width:200px}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:10px;margin-top:14px}
+.gcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px}
+.gcard canvas{display:block;width:100%;height:auto;border-radius:8px;background:var(--card-2)}
+.gmeta{font-size:12px;color:var(--ink-2);margin-top:6px;display:flex;justify-content:space-between;gap:6px;align-items:center}
+.faces{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:10px;margin-top:14px}
+.face{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px;text-align:center}
+.face img{display:block;width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:8px;background:var(--card-2)}
+.fmeta{font-size:12px;color:var(--ink-2);margin-top:6px;word-break:break-word}
+.holder{border:1px dashed var(--line-2);border-radius:12px;min-height:126px;display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:12px;text-align:center;padding:8px}
+#cam video,#cam img{width:100%;max-width:300px;border-radius:12px;display:block;background:#000;margin:10px 0}
+#flash{position:fixed;inset:0;background:#fff;z-index:90;pointer-events:none;opacity:0}
 /* ---- сцены эпох ---- */
 #scene{position:fixed;inset:0;pointer-events:none;z-index:55;overflow:hidden;opacity:0}
 .sc-sky{position:absolute;inset:0}
@@ -381,6 +397,7 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
             <dt>Приём документов</dt><dd>каб. 116, корпус 3</dd>
           </dl>
           <p class="note" style="margin-top:12px">Личный кабинет: <a href="https://student.rea.ru/rating/" target="_blank" rel="noopener">student.rea.ru/rating</a> — там видно, что уже проставили преподаватели. Расписание: <a href="https://rasp.rea.ru/" target="_blank" rel="noopener">rasp.rea.ru</a>. Уведомления шлёт бот <code class="cp">@REA_Student_info_bot</code>, привязывается в разделе «Личные данные».</p>
+          <button class="minibtn" id="photoBtn" type="button">Фотка</button>
         </div>
       </div>
     </div>
@@ -407,7 +424,24 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
       <button class="pbtn" id="pErase" type="button">Ластик</button>
       <button class="pbtn" id="pClear" type="button">Стереть всё</button>
     </div>
+    <div class="pubrow">
+      <input type="text" id="drawName" maxlength="30" placeholder="Как подписать">
+      <button class="pbtn" id="pPublish" type="button">Опубликовать рисунок</button>
+      <span class="note" id="pubNote" style="margin:0"></span>
+    </div>
+    <div class="gallery" id="gallery"></div>
     <p class="note" id="pNote">Пока кисть включена, страница не прокручивается пальцем — нажмите «Готово», и всё вернётся как было.</p>
+  </section>
+
+  <hr class="rule">
+
+  <section id="pochet">
+    <h2>Доска почёта</h2>
+    <p class="lede">Десять мест для тех, кто нажал «Фотка» и не струсил. Снимок видят все, кто откроет страницу; свой можно снять в любой момент.</p>
+    <div class="card pad" id="cam" hidden>
+      <div id="camStep"></div>
+    </div>
+    <div class="faces" id="faces"></div>
   </section>
 
   <footer>
@@ -1534,8 +1568,350 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
       redraw();
     });
 
+    // Галерее нужен доступ к мазкам, чтобы опубликовать рисунок.
+    window.REA_INK = { get: function(){ return strokes; } };
+
     fit();
     paint();
+  })();
+
+  /* ---------- галерея рисунков и доска почёта ---------- */
+  (function(){
+    var ink = window.REA_INK;
+    var cfg = window.REA_CONFIG || {};
+    var API = (cfg.supabaseUrl || '').replace(/\/+$/, '');
+    var KEY = cfg.supabaseAnonKey || '';
+    var ready = !!(API && KEY);
+    var MAX_FACES = 10;
+
+    var gBox = document.getElementById('gallery');
+    var pubBtn = document.getElementById('pPublish');
+    var pubName = document.getElementById('drawName');
+    var pubNote = document.getElementById('pubNote');
+    var faceBox = document.getElementById('faces');
+    var camBox = document.getElementById('cam');
+    var camStep = document.getElementById('camStep');
+    var photoBtn = document.getElementById('photoBtn');
+    if(!gBox || !faceBox) return;
+
+    var ME = 'anon';
+    try {
+      ME = localStorage.getItem('rea1527.me.v1') || ME;
+      if(ME === 'anon'){
+        ME = 'u' + Math.random().toString(36).slice(2, 10);
+        localStorage.setItem('rea1527.me.v1', ME);
+      }
+      pubName.value = localStorage.getItem('rea1527.name.v1') || '';
+    } catch(e){}
+
+    function req(path, opts){
+      opts = opts || {};
+      opts.headers = Object.assign({
+        'apikey': KEY, 'Authorization': 'Bearer ' + KEY, 'Content-Type': 'application/json'
+      }, opts.headers || {});
+      return fetch(API + '/rest/v1/' + path, opts).then(function(r){
+        if(!r.ok) return r.text().then(function(t){ throw new Error(r.status + ' ' + t); });
+        return r.status === 204 ? null : r.json();
+      });
+    }
+
+    // Белая вспышка во весь экран, как затвор телефона.
+    var flashEl = null;
+    function flash(){
+      if(!flashEl){
+        flashEl = document.createElement('div');
+        flashEl.id = 'flash';
+        flashEl.setAttribute('aria-hidden', 'true');
+        document.body.appendChild(flashEl);
+      }
+      if(!flashEl.animate) return;
+      flashEl.animate([
+        { opacity: 0 }, { opacity: 1, offset: .12 }, { opacity: 1, offset: .3 }, { opacity: 0 }
+      ], { duration: 520, easing: 'ease-out' });
+    }
+
+    /* ===== опубликованные рисунки ===== */
+
+    function drawThumb(cv, strokes){
+      var ctx = cv.getContext('2d');
+      var W = 300, H = 200, dpr = Math.min(window.devicePixelRatio || 1, 2);
+      cv.width = W * dpr; cv.height = H * dpr;
+      cv.style.aspectRatio = '3 / 2';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      ctx.clearRect(0, 0, W, H);
+      if(!strokes.length) return;
+      var x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+      strokes.forEach(function(st){
+        st.pts.forEach(function(pt){
+          if(pt[0] < x0) x0 = pt[0];
+          if(pt[0] > x1) x1 = pt[0];
+          if(pt[1] < y0) y0 = pt[1];
+          if(pt[1] > y1) y1 = pt[1];
+        });
+      });
+      var pad = 14;
+      var sw = Math.max(1, x1 - x0), sh = Math.max(1, y1 - y0);
+      var k = Math.min((W - pad * 2) / sw, (H - pad * 2) / sh, 1);
+      var ox = (W - sw * k) / 2 - x0 * k, oy = (H - sh * k) / 2 - y0 * k;
+      strokes.forEach(function(st){
+        ctx.strokeStyle = st.c;
+        ctx.lineWidth = Math.max(1, st.w * k);
+        ctx.beginPath();
+        st.pts.forEach(function(pt, i){
+          var x = pt[0] * k + ox, y = pt[1] * k + oy;
+          if(i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        });
+        if(st.pts.length === 1){
+          ctx.fillStyle = st.c;
+          ctx.arc(st.pts[0][0] * k + ox, st.pts[0][1] * k + oy, Math.max(1, st.w * k / 2), 0, Math.PI * 2);
+          ctx.fill();
+        } else ctx.stroke();
+      });
+    }
+
+    function paintGallery(rows){
+      if(!rows.length){
+        gBox.innerHTML = '<div class="holder">Опубликованных рисунков пока нет. Нарисуйте что-нибудь и нажмите «Опубликовать».</div>';
+        return;
+      }
+      gBox.innerHTML = '';
+      rows.forEach(function(row){
+        var card = document.createElement('div');
+        card.className = 'gcard';
+        var cv = document.createElement('canvas');
+        card.appendChild(cv);
+        var meta = document.createElement('div');
+        meta.className = 'gmeta';
+        var who = document.createElement('span');
+        who.textContent = row.name || 'без подписи';
+        meta.appendChild(who);
+        if(row.author === ME){
+          var del = document.createElement('button');
+          del.className = 'x'; del.type = 'button';
+          del.textContent = '✕';
+          del.title = 'Удалить';
+          del.addEventListener('click', function(){
+            req('gallery?id=eq.' + encodeURIComponent(row.id), { method: 'DELETE' })
+              .then(loadGallery).catch(function(){});
+          });
+          meta.appendChild(del);
+        }
+        card.appendChild(meta);
+        gBox.appendChild(card);
+        try { drawThumb(cv, JSON.parse(row.data)); } catch(e){}
+      });
+    }
+
+    function loadGallery(){
+      if(!ready) return;
+      req('gallery?kind=eq.draw&select=*&order=created_at.desc&limit=12')
+        .then(paintGallery)
+        .catch(function(){ gBox.innerHTML = '<div class="holder">Галерея не отвечает.</div>'; });
+    }
+
+    if(pubBtn){
+      pubBtn.addEventListener('click', function(){
+        if(!ready){ pubNote.textContent = 'Галерея не подключена.'; return; }
+        var strokes = ink ? ink.get() : [];
+        if(!strokes.length){ pubNote.textContent = 'Сначала нарисуйте что-нибудь кистью выше.'; return; }
+        var name = (pubName.value || '').trim().slice(0, 30);
+        try { localStorage.setItem('rea1527.name.v1', name); } catch(e){}
+        var data = JSON.stringify(strokes);
+        if(data.length > 390000){ pubNote.textContent = 'Рисунок слишком большой — сотрите часть и попробуйте снова.'; return; }
+        pubBtn.disabled = true;
+        pubNote.textContent = 'Отправляю…';
+        req('gallery', {
+          method: 'POST',
+          headers: { 'Prefer': 'return=representation' },
+          body: JSON.stringify({ kind: 'draw', author: ME, name: name || null, data: data })
+        }).then(function(){
+          pubNote.textContent = 'Готово, рисунок в галерее.';
+          loadGallery();
+        }).catch(function(e){
+          pubNote.textContent = 'Не отправилось: ' + e.message;
+        }).then(function(){ pubBtn.disabled = false; });
+      });
+    }
+
+    /* ===== доска почёта ===== */
+
+    var faces = [];
+
+    function paintFaces(){
+      faceBox.innerHTML = '';
+      faces.forEach(function(row){
+        var card = document.createElement('div');
+        card.className = 'face';
+        var img = document.createElement('img');
+        img.src = row.data;
+        img.alt = row.name ? ('Снимок: ' + row.name) : 'Снимок участника';
+        card.appendChild(img);
+        var meta = document.createElement('div');
+        meta.className = 'fmeta';
+        meta.textContent = row.name || 'без подписи';
+        card.appendChild(meta);
+        if(row.author === ME){
+          var del = document.createElement('button');
+          del.className = 'pbtn'; del.type = 'button';
+          del.style.marginTop = '6px';
+          del.textContent = 'Убрать';
+          del.addEventListener('click', function(){
+            req('gallery?id=eq.' + encodeURIComponent(row.id), { method: 'DELETE' })
+              .then(loadFaces).catch(function(){});
+          });
+          card.appendChild(del);
+        }
+        faceBox.appendChild(card);
+      });
+      // Показываем не все свободные места, иначе при одном снимке
+      // страница превращается в девять пустых рамок.
+      var free = Math.min(MAX_FACES - faces.length, 3);
+      for(var i = 0; i < free; i++){
+        var h = document.createElement('div');
+        h.className = 'holder';
+        h.textContent = 'свободно (' + (MAX_FACES - faces.length) + ' из 10)';
+        faceBox.appendChild(h);
+      }
+      if(!faces.length){
+        faceBox.innerHTML = '<div class="holder" style="grid-column:1/-1">Пока никто не решился. Кнопка «Фотка» спрятана выше, в блоке «Куда писать».</div>';
+      }
+    }
+
+    function loadFaces(){
+      if(!ready) return;
+      req('gallery?kind=eq.face&select=*&order=created_at.desc&limit=' + MAX_FACES)
+        .then(function(rows){ faces = rows || []; paintFaces(); })
+        .catch(function(){ faceBox.innerHTML = '<div class="holder" style="grid-column:1/-1">Доска почёта не отвечает.</div>'; });
+    }
+
+    var stream = null, shot = null;
+
+    function stopCam(){
+      if(stream){ stream.getTracks().forEach(function(t){ t.stop(); }); stream = null; }
+    }
+    function closeCam(){
+      stopCam(); shot = null;
+      camStep.innerHTML = '';
+      camBox.hidden = true;
+    }
+    function step(html){
+      camBox.hidden = false;
+      camStep.innerHTML = html;
+    }
+
+    function askCam(){
+      if(!ready){ step('<p style="margin:0">Доска почёта не подключена.</p>'); return; }
+      if(faces.length >= MAX_FACES){
+        step('<p style="margin:0 0 10px"><b>Мест нет.</b> Все десять заняты — подождите, пока кто-нибудь снимет свой снимок.</p>' +
+             '<button class="pbtn" data-act="close" type="button">Понятно</button>');
+        return;
+      }
+      step('<p style="margin:0 0 10px"><b>Сейчас включится камера.</b> Снимок попадёт на доску почёта ниже, и его увидят все, кто откроет страницу. ' +
+           'Передумать можно в любой момент до публикации — пока вы не нажмёте «Повесить на доску», снимок никуда не уходит.</p>' +
+           '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+           '<button class="pbtn go" data-act="start" type="button">Включить камеру</button>' +
+           '<button class="pbtn" data-act="close" type="button">Отмена</button></div>');
+    }
+
+    function startCam(){
+      if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+        step('<p style="margin:0 0 10px">Этот браузер не даёт доступ к камере.</p>' +
+             '<button class="pbtn" data-act="close" type="button">Закрыть</button>');
+        return;
+      }
+      step('<p style="margin:0">Прошу доступ к камере…</p>');
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 } }, audio: false })
+        .then(function(st){
+          stream = st;
+          step('<video id="camView" autoplay playsinline muted></video>' +
+               '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+               '<button class="pbtn go" data-act="shot" type="button">Снять</button>' +
+               '<button class="pbtn" data-act="close" type="button">Отмена</button></div>');
+          var v = document.getElementById('camView');
+          v.srcObject = st;
+        })
+        .catch(function(){
+          step('<p style="margin:0 0 10px">Камера не открылась. Браузер мог отказать в доступе — проверьте разрешение для этого сайта.</p>' +
+               '<button class="pbtn" data-act="close" type="button">Закрыть</button>');
+        });
+    }
+
+    function takeShot(){
+      var v = document.getElementById('camView');
+      if(!v || !v.videoWidth) return;
+      flash();
+      var maxW = 360;
+      var k = Math.min(1, maxW / v.videoWidth);
+      var cv = document.createElement('canvas');
+      cv.width = Math.round(v.videoWidth * k);
+      cv.height = Math.round(v.videoHeight * k);
+      var ctx = cv.getContext('2d');
+      ctx.translate(cv.width, 0);
+      ctx.scale(-1, 1); // зеркалим, как в селфи-камере
+      ctx.drawImage(v, 0, 0, cv.width, cv.height);
+      shot = cv.toDataURL('image/jpeg', 0.7);
+      stopCam();
+      var nm = '';
+      try { nm = localStorage.getItem('rea1527.name.v1') || ''; } catch(e){}
+      step('<img src="' + shot + '" alt="Ваш снимок">' +
+           '<input type="text" id="faceName" maxlength="30" placeholder="Как подписать" value="' +
+           nm.replace(/"/g, '&quot;') + '" style="max-width:240px;margin-bottom:10px">' +
+           '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+           '<button class="pbtn go" data-act="post" type="button">Повесить на доску</button>' +
+           '<button class="pbtn" data-act="again" type="button">Переснять</button>' +
+           '<button class="pbtn" data-act="close" type="button">Удалить и выйти</button></div>');
+    }
+
+    function postShot(){
+      if(!shot) return;
+      var nameEl = document.getElementById('faceName');
+      var name = ((nameEl && nameEl.value) || '').trim().slice(0, 30);
+      try { localStorage.setItem('rea1527.name.v1', name); } catch(e){}
+      step('<p style="margin:0">Отправляю…</p>');
+      req('gallery', {
+        method: 'POST',
+        headers: { 'Prefer': 'return=representation' },
+        body: JSON.stringify({ kind: 'face', author: ME, name: name || null, data: shot })
+      }).then(function(){
+        shot = null;
+        closeCam();
+        loadFaces();
+        var sec = document.getElementById('pochet');
+        if(sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }).catch(function(e){
+        step('<p style="margin:0 0 10px">Не отправилось: ' + e.message + '</p>' +
+             '<button class="pbtn" data-act="close" type="button">Закрыть</button>');
+      });
+    }
+
+    camStep.addEventListener('click', function(e){
+      var b = e.target.closest('button[data-act]');
+      if(!b) return;
+      var act = b.dataset.act;
+      if(act === 'close') closeCam();
+      else if(act === 'start') startCam();
+      else if(act === 'shot') takeShot();
+      else if(act === 'again') startCam();
+      else if(act === 'post') postShot();
+    });
+
+    if(photoBtn){
+      photoBtn.addEventListener('click', function(){
+        var sec = document.getElementById('pochet');
+        askCam();
+        if(sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+    window.addEventListener('pagehide', stopCam);
+
+    if(!ready){
+      gBox.innerHTML = '<div class="holder">Галерея подключается через Supabase.</div>';
+      faceBox.innerHTML = '<div class="holder" style="grid-column:1/-1">Доска почёта подключается через Supabase.</div>';
+      return;
+    }
+    loadGallery();
+    loadFaces();
   })();
 
   renderNow();

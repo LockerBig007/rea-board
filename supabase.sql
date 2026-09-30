@@ -34,3 +34,31 @@ create policy deadlines_delete on deadlines for delete using (true);
 -- Автоудаление старых закрытых записей, чтобы доска не росла бесконечно.
 -- Необязательно; включите, если понадобится:
 -- delete from deadlines where done and created_at < now() - interval '90 days';
+
+-- Галерея: опубликованные рисунки и снимки для доски почёта.
+-- kind = 'draw' — в data лежит JSON мазков; kind = 'face' — data:image/jpeg.
+
+create table if not exists gallery (
+  id         uuid primary key default gen_random_uuid(),
+  kind       text        not null check (kind in ('draw','face')),
+  author     text        not null check (char_length(author) <= 60),
+  name       text        check (char_length(name) <= 40),
+  data       text        not null check (char_length(data) <= 400000),
+  created_at timestamptz not null default now()
+);
+
+create index if not exists gallery_kind_idx on gallery (kind, created_at desc);
+
+alter table gallery enable row level security;
+
+-- Как и с доской: логинов нет, поэтому читать и добавлять может любой.
+-- Кнопка удаления в интерфейсе показывается только автору — он опознаётся
+-- по случайному коду в браузере. Это удобство, а не защита.
+
+drop policy if exists gallery_read   on gallery;
+drop policy if exists gallery_insert on gallery;
+drop policy if exists gallery_delete on gallery;
+
+create policy gallery_read   on gallery for select using (true);
+create policy gallery_insert on gallery for insert with check (true);
+create policy gallery_delete on gallery for delete using (true);

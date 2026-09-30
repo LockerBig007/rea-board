@@ -189,22 +189,38 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
 .sz i{display:block;border-radius:50%;background:var(--ink-2)}
 .sz.on{border-color:var(--accent)}
 .sz.on i{background:var(--accent)}
-/* ---- галерея и доска почёта ---- */
+/* ---- доска почёта и подписи к рисункам ---- */
 .minibtn{font:inherit;font-size:11px;padding:2px 9px;border-radius:7px;border:1px solid var(--line-2);background:var(--card);color:var(--ink-3);cursor:pointer;margin-top:12px}
 .minibtn:hover{border-color:var(--accent);color:var(--accent)}
 .pubrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}
 .pubrow input{max-width:200px}
-.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:10px;margin-top:14px}
-.gcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px}
-.gcard canvas{display:block;width:100%;height:auto;border-radius:8px;background:var(--card-2)}
-.gmeta{font-size:12px;color:var(--ink-2);margin-top:6px;display:flex;justify-content:space-between;gap:6px;align-items:center}
-.faces{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:10px;margin-top:14px}
-.face{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px;text-align:center}
-.face img{display:block;width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:8px;background:var(--card-2)}
-.fmeta{font-size:12px;color:var(--ink-2);margin-top:6px;word-break:break-word}
-.holder{border:1px dashed var(--line-2);border-radius:12px;min-height:126px;display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:12px;text-align:center;padding:8px}
-#cam video,#cam img{width:100%;max-width:300px;border-radius:12px;display:block;background:#000;margin:10px 0}
-#flash{position:fixed;inset:0;background:#fff;z-index:90;pointer-events:none;opacity:0}
+.board{position:relative;margin-top:16px;border:12px solid #6f4720;border-radius:10px;padding:30px 20px 46px;min-height:460px;
+  background-color:#bf8f56;
+  background-image:radial-gradient(circle at 18% 22%,rgba(90,55,20,.16) 0 2px,transparent 3px),
+    radial-gradient(circle at 64% 44%,rgba(90,55,20,.14) 0 2px,transparent 3px),
+    radial-gradient(circle at 37% 71%,rgba(90,55,20,.15) 0 2px,transparent 3px),
+    radial-gradient(circle at 86% 83%,rgba(90,55,20,.13) 0 2px,transparent 3px);
+  background-size:70px 70px,54px 54px,88px 88px,46px 46px;
+  box-shadow:inset 0 0 70px rgba(60,32,8,.35),var(--shadow)}
+.faces{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:34px 20px}
+.face{position:relative;background:#fdfbf4;padding:9px 9px 30px;border-radius:2px;box-shadow:0 7px 18px rgba(50,28,6,.45)}
+.face img{display:block;width:100%;aspect-ratio:3/4;object-fit:cover;background:#d9d4c8}
+.fmeta{position:absolute;left:8px;right:8px;bottom:8px;text-align:center;font-size:12px;color:#3c342a;word-break:break-word}
+.pin{position:absolute;top:-10px;left:50%;margin-left:-9px;width:18px;height:18px;border-radius:50%;
+  background:radial-gradient(circle at 34% 30%,#ff9a90,#d32f2f 58%,#8c1a15);
+  box-shadow:0 3px 5px rgba(40,18,4,.5),inset 0 -2px 3px rgba(0,0,0,.3)}
+.face .drop{position:absolute;right:6px;top:6px;border:0;background:rgba(255,255,255,.85);border-radius:6px;font:inherit;font-size:11px;padding:1px 6px;color:#8c1a15;cursor:pointer}
+.holder{position:relative;border:2px dashed rgba(255,255,255,.4);border-radius:3px;min-height:150px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.75);font-size:12px;text-align:center;padding:8px}
+/* подписи к чужим рисункам поверх страницы */
+#inkTags{position:fixed;inset:0;z-index:41;pointer-events:none;overflow:hidden}
+.inktag{position:absolute;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--card);border:1px solid var(--line-2);color:var(--ink-2);white-space:nowrap;box-shadow:var(--shadow)}
+/* съёмка */
+#shotwrap{position:fixed;inset:0;z-index:92;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(10,14,20,.82)}
+#shotwrap .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;max-width:460px;width:100%;text-align:center;box-shadow:var(--shadow)}
+#shotwrap video,#shotwrap img{display:block;width:100%;border-radius:12px;background:#000;margin-bottom:12px}
+#shotwrap .row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+#shotwrap .tick{position:absolute;font-family:var(--display);font-size:78px;font-weight:600;color:#fff;text-shadow:0 4px 24px rgba(0,0,0,.6);pointer-events:none}
+#flash{position:fixed;inset:0;background:#fff;z-index:100;pointer-events:none;opacity:0}
 /* ---- сцены эпох ---- */
 #scene{position:fixed;inset:0;pointer-events:none;z-index:55;overflow:hidden;opacity:0}
 .sc-sky{position:absolute;inset:0}
@@ -416,7 +432,7 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
 
   <section id="risovat">
     <h2>Порисовать</h2>
-    <p class="lede">Пять цветов и кисть. Рисовать можно поверх всей страницы: обвести свою пару, поставить стрелку, оставить записку соседу по парте. Рисунок остаётся в вашем браузере и виден только вам.</p>
+    <p class="lede">Рисунок остаётся в вашем браузере и виден только вам.</p>
     <div class="paintbar" id="paintbar">
       <button class="pbtn go" id="pOn" type="button">Рисовать</button>
       <div class="pgroup" id="pColors"></div>
@@ -425,23 +441,18 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
       <button class="pbtn" id="pClear" type="button">Стереть всё</button>
     </div>
     <div class="pubrow">
-      <input type="text" id="drawName" maxlength="30" placeholder="Как подписать">
-      <button class="pbtn" id="pPublish" type="button">Опубликовать рисунок</button>
-      <span class="note" id="pubNote" style="margin:0"></span>
+      <input type="text" id="drawName" maxlength="30" placeholder="Ваше имя">
+      <button class="pbtn" id="pPublish" type="button">Опубликовать</button>
+      <button class="pbtn" id="pUnpublish" type="button" hidden>Убрать мой рисунок</button>
     </div>
-    <div class="gallery" id="gallery"></div>
-    <p class="note" id="pNote">Пока кисть включена, страница не прокручивается пальцем — нажмите «Готово», и всё вернётся как было.</p>
+    <p class="note" id="pubNote">Опубликованный рисунок появится прямо на странице у всех, подписанный вашим именем.</p>
   </section>
 
-  <hr class="rule">
+  <hr class="rule" id="pochetRule" hidden>
 
-  <section id="pochet">
+  <section id="pochet" hidden>
     <h2>Доска почёта</h2>
-    <p class="lede">Десять мест для тех, кто нажал «Фотка» и не струсил. Снимок видят все, кто откроет страницу; свой можно снять в любой момент.</p>
-    <div class="card pad" id="cam" hidden>
-      <div id="camStep"></div>
-    </div>
-    <div class="faces" id="faces"></div>
+    <div class="board"><div class="faces" id="faces"></div></div>
   </section>
 
   <footer>
@@ -1575,7 +1586,7 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
     paint();
   })();
 
-  /* ---------- галерея рисунков и доска почёта ---------- */
+  /* ---------- чужие рисунки на странице и доска почёта ---------- */
   (function(){
     var ink = window.REA_INK;
     var cfg = window.REA_CONFIG || {};
@@ -1584,24 +1595,24 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
     var ready = !!(API && KEY);
     var MAX_FACES = 10;
 
-    var gBox = document.getElementById('gallery');
     var pubBtn = document.getElementById('pPublish');
+    var unpubBtn = document.getElementById('pUnpublish');
     var pubName = document.getElementById('drawName');
     var pubNote = document.getElementById('pubNote');
     var faceBox = document.getElementById('faces');
-    var camBox = document.getElementById('cam');
-    var camStep = document.getElementById('camStep');
+    var hall = document.getElementById('pochet');
+    var hallRule = document.getElementById('pochetRule');
     var photoBtn = document.getElementById('photoBtn');
-    if(!gBox || !faceBox) return;
+    if(!faceBox) return;
 
-    var ME = 'anon';
+    var ME = 'anon', SHOT_KEY = 'rea1527.shot.v1';
     try {
-      ME = localStorage.getItem('rea1527.me.v1') || ME;
-      if(ME === 'anon'){
+      ME = localStorage.getItem('rea1527.me.v1') || '';
+      if(!ME){
         ME = 'u' + Math.random().toString(36).slice(2, 10);
         localStorage.setItem('rea1527.me.v1', ME);
       }
-      pubName.value = localStorage.getItem('rea1527.name.v1') || '';
+      if(pubName) pubName.value = localStorage.getItem('rea1527.name.v1') || '';
     } catch(e){}
 
     function req(path, opts){
@@ -1615,7 +1626,6 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
       });
     }
 
-    // Белая вспышка во весь экран, как затвор телефона.
     var flashEl = null;
     function flash(){
       if(!flashEl){
@@ -1626,111 +1636,142 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
       }
       if(!flashEl.animate) return;
       flashEl.animate([
-        { opacity: 0 }, { opacity: 1, offset: .12 }, { opacity: 1, offset: .3 }, { opacity: 0 }
-      ], { duration: 520, easing: 'ease-out' });
+        { opacity: 0 }, { opacity: 1, offset: .1 }, { opacity: 1, offset: .32 }, { opacity: 0 }
+      ], { duration: 560, easing: 'ease-out' });
     }
 
-    /* ===== опубликованные рисунки ===== */
+    /* ===== чужие рисунки прямо на странице ===== */
 
-    function drawThumb(cv, strokes){
-      var ctx = cv.getContext('2d');
-      var W = 300, H = 200, dpr = Math.min(window.devicePixelRatio || 1, 2);
-      cv.width = W * dpr; cv.height = H * dpr;
-      cv.style.aspectRatio = '3 / 2';
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-      ctx.clearRect(0, 0, W, H);
-      if(!strokes.length) return;
-      var x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
-      strokes.forEach(function(st){
-        st.pts.forEach(function(pt){
-          if(pt[0] < x0) x0 = pt[0];
-          if(pt[0] > x1) x1 = pt[0];
-          if(pt[1] < y0) y0 = pt[1];
-          if(pt[1] > y1) y1 = pt[1];
-        });
-      });
-      var pad = 14;
-      var sw = Math.max(1, x1 - x0), sh = Math.max(1, y1 - y0);
-      var k = Math.min((W - pad * 2) / sw, (H - pad * 2) / sh, 1);
-      var ox = (W - sw * k) / 2 - x0 * k, oy = (H - sh * k) / 2 - y0 * k;
-      strokes.forEach(function(st){
-        ctx.strokeStyle = st.c;
-        ctx.lineWidth = Math.max(1, st.w * k);
-        ctx.beginPath();
-        st.pts.forEach(function(pt, i){
-          var x = pt[0] * k + ox, y = pt[1] * k + oy;
-          if(i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-        });
-        if(st.pts.length === 1){
-          ctx.fillStyle = st.c;
-          ctx.arc(st.pts[0][0] * k + ox, st.pts[0][1] * k + oy, Math.max(1, st.w * k / 2), 0, Math.PI * 2);
-          ctx.fill();
-        } else ctx.stroke();
-      });
+    var pubCv = document.createElement('canvas');
+    pubCv.id = 'inkPub';
+    pubCv.setAttribute('aria-hidden', 'true');
+    pubCv.style.cssText = 'position:fixed;inset:0;z-index:39;pointer-events:none';
+    document.body.appendChild(pubCv);
+    var pctx = pubCv.getContext('2d');
+
+    var tagBox = document.createElement('div');
+    tagBox.id = 'inkTags';
+    tagBox.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(tagBox);
+
+    var published = [];
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    function fitPub(){
+      var w = window.innerWidth, h = window.innerHeight;
+      pubCv.width = Math.round(w * dpr);
+      pubCv.height = Math.round(h * dpr);
+      pubCv.style.width = w + 'px';
+      pubCv.style.height = h + 'px';
+      pctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      pctx.lineCap = 'round';
+      pctx.lineJoin = 'round';
+      drawPub();
     }
 
-    function paintGallery(rows){
-      if(!rows.length){
-        gBox.innerHTML = '<div class="holder">Опубликованных рисунков пока нет. Нарисуйте что-нибудь и нажмите «Опубликовать».</div>';
-        return;
-      }
-      gBox.innerHTML = '';
-      rows.forEach(function(row){
-        var card = document.createElement('div');
-        card.className = 'gcard';
-        var cv = document.createElement('canvas');
-        card.appendChild(cv);
-        var meta = document.createElement('div');
-        meta.className = 'gmeta';
-        var who = document.createElement('span');
-        who.textContent = row.name || 'без подписи';
-        meta.appendChild(who);
-        if(row.author === ME){
-          var del = document.createElement('button');
-          del.className = 'x'; del.type = 'button';
-          del.textContent = '✕';
-          del.title = 'Удалить';
-          del.addEventListener('click', function(){
-            req('gallery?id=eq.' + encodeURIComponent(row.id), { method: 'DELETE' })
-              .then(loadGallery).catch(function(){});
+    function drawPub(){
+      var ox = window.scrollX || window.pageXOffset;
+      var oy = window.scrollY || window.pageYOffset;
+      pctx.clearRect(0, 0, pubCv.width, pubCv.height);
+      tagBox.innerHTML = '';
+      published.forEach(function(item){
+        var minX = Infinity, minY = Infinity;
+        item.strokes.forEach(function(st){
+          pctx.strokeStyle = st.c;
+          pctx.lineWidth = st.w;
+          pctx.globalAlpha = 0.75;
+          pctx.beginPath();
+          st.pts.forEach(function(pt, i){
+            if(pt[0] < minX) minX = pt[0];
+            if(pt[1] < minY) minY = pt[1];
+            var x = pt[0] - ox, y = pt[1] - oy;
+            if(i === 0) pctx.moveTo(x, y); else pctx.lineTo(x, y);
           });
-          meta.appendChild(del);
-        }
-        card.appendChild(meta);
-        gBox.appendChild(card);
-        try { drawThumb(cv, JSON.parse(row.data)); } catch(e){}
+          if(st.pts.length === 1){
+            pctx.fillStyle = st.c;
+            pctx.arc(st.pts[0][0] - ox, st.pts[0][1] - oy, st.w / 2, 0, Math.PI * 2);
+            pctx.fill();
+          } else pctx.stroke();
+        });
+        pctx.globalAlpha = 1;
+        if(minX === Infinity) return;
+        var tx = minX - ox, ty = minY - oy - 22;
+        if(ty < 0 || ty > window.innerHeight || tx > window.innerWidth) return;
+        var tag = document.createElement('div');
+        tag.className = 'inktag';
+        tag.textContent = item.name || 'аноним';
+        tag.style.left = Math.max(6, tx) + 'px';
+        tag.style.top = ty + 'px';
+        tagBox.appendChild(tag);
       });
     }
 
-    function loadGallery(){
-      if(!ready) return;
-      req('gallery?kind=eq.draw&select=*&order=created_at.desc&limit=12')
-        .then(paintGallery)
-        .catch(function(){ gBox.innerHTML = '<div class="holder">Галерея не отвечает.</div>'; });
+    var pend = false;
+    function schedulePub(){
+      if(pend) return;
+      pend = true;
+      requestAnimationFrame(function(){ pend = false; drawPub(); });
     }
+
+    function loadDrawings(){
+      if(!ready) return;
+      req('gallery?kind=eq.draw&select=id,author,name,data&order=created_at.desc&limit=30')
+        .then(function(rows){
+          published = (rows || []).map(function(r){
+            var st = [];
+            try { st = JSON.parse(r.data) || []; } catch(e){}
+            return { id: r.id, author: r.author, name: r.name, strokes: st };
+          }).filter(function(x){ return x.strokes.length; });
+          var mine = published.some(function(x){ return x.author === ME; });
+          if(unpubBtn) unpubBtn.hidden = !mine;
+          drawPub();
+        })
+        .catch(function(){});
+    }
+
+    window.addEventListener('resize', fitPub);
+    window.addEventListener('scroll', schedulePub, { passive: true });
 
     if(pubBtn){
       pubBtn.addEventListener('click', function(){
-        if(!ready){ pubNote.textContent = 'Галерея не подключена.'; return; }
+        if(!ready){ pubNote.textContent = 'Публикация не подключена.'; return; }
         var strokes = ink ? ink.get() : [];
         if(!strokes.length){ pubNote.textContent = 'Сначала нарисуйте что-нибудь кистью выше.'; return; }
         var name = (pubName.value || '').trim().slice(0, 30);
+        if(!name){ pubNote.textContent = 'Впишите имя — рисунок подписывается им.'; pubName.focus(); return; }
         try { localStorage.setItem('rea1527.name.v1', name); } catch(e){}
         var data = JSON.stringify(strokes);
-        if(data.length > 390000){ pubNote.textContent = 'Рисунок слишком большой — сотрите часть и попробуйте снова.'; return; }
+        if(data.length > 390000){ pubNote.textContent = 'Рисунок слишком большой — сотрите часть.'; return; }
         pubBtn.disabled = true;
         pubNote.textContent = 'Отправляю…';
-        req('gallery', {
-          method: 'POST',
-          headers: { 'Prefer': 'return=representation' },
-          body: JSON.stringify({ kind: 'draw', author: ME, name: name || null, data: data })
-        }).then(function(){
-          pubNote.textContent = 'Готово, рисунок в галерее.';
-          loadGallery();
-        }).catch(function(e){
-          pubNote.textContent = 'Не отправилось: ' + e.message;
-        }).then(function(){ pubBtn.disabled = false; });
+        req('gallery?author=eq.' + encodeURIComponent(ME) + '&kind=eq.draw', { method: 'DELETE' })
+          .catch(function(){})
+          .then(function(){
+            return req('gallery', {
+              method: 'POST',
+              headers: { 'Prefer': 'return=representation' },
+              body: JSON.stringify({ kind: 'draw', author: ME, name: name, data: data })
+            });
+          })
+          .then(function(){
+            pubNote.textContent = 'Готово — рисунок теперь видят все.';
+            loadDrawings();
+          })
+          .catch(function(e){ pubNote.textContent = 'Не отправилось: ' + e.message; })
+          .then(function(){ pubBtn.disabled = false; });
+      });
+    }
+    if(unpubBtn){
+      unpubBtn.addEventListener('click', function(){
+        if(!ready) return;
+        unpubBtn.disabled = true;
+        req('gallery?author=eq.' + encodeURIComponent(ME) + '&kind=eq.draw', { method: 'DELETE' })
+          .then(function(){
+            pubNote.textContent = 'Рисунок убран со страницы.';
+            loadDrawings();
+          })
+          .catch(function(){})
+          .then(function(){ unpubBtn.disabled = false; });
       });
     }
 
@@ -1738,11 +1779,35 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
 
     var faces = [];
 
+    function seen(){
+      try { return localStorage.getItem(SHOT_KEY) === '1'; } catch(e){ return false; }
+    }
+    function reveal(){
+      try { localStorage.setItem(SHOT_KEY, '1'); } catch(e){}
+      showHall();
+    }
+    function showHall(){
+      if(!seen()) return;
+      hall.hidden = false;
+      if(hallRule) hallRule.hidden = false;
+      loadFaces();
+    }
+
+    function spin(id){
+      var h = 0;
+      for(var i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) % 1000;
+      return (h / 1000 * 8 - 4).toFixed(2);
+    }
+
     function paintFaces(){
       faceBox.innerHTML = '';
       faces.forEach(function(row){
         var card = document.createElement('div');
         card.className = 'face';
+        card.style.transform = 'rotate(' + spin(row.id) + 'deg)';
+        var pin = document.createElement('span');
+        pin.className = 'pin';
+        card.appendChild(pin);
         var img = document.createElement('img');
         img.src = row.data;
         img.alt = row.name ? ('Снимок: ' + row.name) : 'Снимок участника';
@@ -1753,9 +1818,9 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
         card.appendChild(meta);
         if(row.author === ME){
           var del = document.createElement('button');
-          del.className = 'pbtn'; del.type = 'button';
-          del.style.marginTop = '6px';
-          del.textContent = 'Убрать';
+          del.className = 'drop';
+          del.type = 'button';
+          del.textContent = 'снять';
           del.addEventListener('click', function(){
             req('gallery?id=eq.' + encodeURIComponent(row.id), { method: 'DELETE' })
               .then(loadFaces).catch(function(){});
@@ -1764,17 +1829,12 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
         }
         faceBox.appendChild(card);
       });
-      // Показываем не все свободные места, иначе при одном снимке
-      // страница превращается в девять пустых рамок.
-      var free = Math.min(MAX_FACES - faces.length, 3);
+      var free = Math.min(MAX_FACES - faces.length, faces.length ? 2 : 4);
       for(var i = 0; i < free; i++){
         var h = document.createElement('div');
         h.className = 'holder';
-        h.textContent = 'свободно (' + (MAX_FACES - faces.length) + ' из 10)';
+        h.textContent = 'свободно';
         faceBox.appendChild(h);
-      }
-      if(!faces.length){
-        faceBox.innerHTML = '<div class="holder" style="grid-column:1/-1">Пока никто не решился. Кнопка «Фотка» спрятана выше, в блоке «Куда писать».</div>';
       }
     }
 
@@ -1782,136 +1842,134 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
       if(!ready) return;
       req('gallery?kind=eq.face&select=*&order=created_at.desc&limit=' + MAX_FACES)
         .then(function(rows){ faces = rows || []; paintFaces(); })
-        .catch(function(){ faceBox.innerHTML = '<div class="holder" style="grid-column:1/-1">Доска почёта не отвечает.</div>'; });
+        .catch(function(){ faceBox.innerHTML = '<div class="holder">Доска не отвечает.</div>'; });
     }
 
-    var stream = null, shot = null;
+    /* ===== съёмка ===== */
 
-    function stopCam(){
+    var wrap = null, stream = null, shot = null;
+
+    function closeShot(){
       if(stream){ stream.getTracks().forEach(function(t){ t.stop(); }); stream = null; }
+      shot = null;
+      if(wrap){ wrap.remove(); wrap = null; }
     }
-    function closeCam(){
-      stopCam(); shot = null;
-      camStep.innerHTML = '';
-      camBox.hidden = true;
-    }
-    function step(html){
-      camBox.hidden = false;
-      camStep.innerHTML = html;
-    }
-
-    function askCam(){
-      if(!ready){ step('<p style="margin:0">Доска почёта не подключена.</p>'); return; }
-      if(faces.length >= MAX_FACES){
-        step('<p style="margin:0 0 10px"><b>Мест нет.</b> Все десять заняты — подождите, пока кто-нибудь снимет свой снимок.</p>' +
-             '<button class="pbtn" data-act="close" type="button">Понятно</button>');
-        return;
+    function panel(html){
+      if(!wrap){
+        wrap = document.createElement('div');
+        wrap.id = 'shotwrap';
+        document.body.appendChild(wrap);
+        wrap.addEventListener('click', function(e){
+          var b = e.target.closest('button[data-act]');
+          if(!b) return;
+          var act = b.dataset.act;
+          if(act === 'close') closeShot();
+          else if(act === 'again') start();
+          else if(act === 'post') post();
+        });
       }
-      step('<p style="margin:0 0 10px"><b>Сейчас включится камера.</b> Снимок попадёт на доску почёта ниже, и его увидят все, кто откроет страницу. ' +
-           'Передумать можно в любой момент до публикации — пока вы не нажмёте «Повесить на доску», снимок никуда не уходит.</p>' +
-           '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
-           '<button class="pbtn go" data-act="start" type="button">Включить камеру</button>' +
-           '<button class="pbtn" data-act="close" type="button">Отмена</button></div>');
+      wrap.innerHTML = '<div class="panel">' + html + '</div>';
     }
 
-    function startCam(){
+    function start(){
+      if(!ready){ panel('<p style="margin:0 0 12px">Доска почёта не подключена.</p><div class="row"><button class="pbtn" data-act="close" type="button">Закрыть</button></div>'); return; }
       if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-        step('<p style="margin:0 0 10px">Этот браузер не даёт доступ к камере.</p>' +
-             '<button class="pbtn" data-act="close" type="button">Закрыть</button>');
+        panel('<p style="margin:0 0 12px">Этот браузер не даёт доступ к камере.</p><div class="row"><button class="pbtn" data-act="close" type="button">Закрыть</button></div>');
         return;
       }
-      step('<p style="margin:0">Прошу доступ к камере…</p>');
-      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 } }, audio: false })
+      panel('<p style="margin:0">Включаю камеру…</p>');
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 720 } }, audio: false })
         .then(function(st){
           stream = st;
-          step('<video id="camView" autoplay playsinline muted></video>' +
-               '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
-               '<button class="pbtn go" data-act="shot" type="button">Снять</button>' +
-               '<button class="pbtn" data-act="close" type="button">Отмена</button></div>');
+          panel('<div style="position:relative"><video id="camView" autoplay playsinline muted></video>' +
+                '<div class="tick" id="camTick" style="left:50%;top:38%;transform:translate(-50%,-50%)">3</div></div>' +
+                '<div class="row"><button class="pbtn" data-act="close" type="button">Отмена</button></div>');
           var v = document.getElementById('camView');
           v.srcObject = st;
+          var n = 3, tick = document.getElementById('camTick');
+          var timer = setInterval(function(){
+            n--;
+            if(!wrap || !document.getElementById('camTick')){ clearInterval(timer); return; }
+            if(n > 0){ tick.textContent = n; return; }
+            clearInterval(timer);
+            capture();
+          }, 900);
         })
         .catch(function(){
-          step('<p style="margin:0 0 10px">Камера не открылась. Браузер мог отказать в доступе — проверьте разрешение для этого сайта.</p>' +
-               '<button class="pbtn" data-act="close" type="button">Закрыть</button>');
+          panel('<p style="margin:0 0 12px">Камера не открылась — браузер отказал в доступе. Разрешение можно выдать в настройках сайта.</p>' +
+                '<div class="row"><button class="pbtn" data-act="close" type="button">Закрыть</button></div>');
         });
     }
 
-    function takeShot(){
+    function capture(){
       var v = document.getElementById('camView');
-      if(!v || !v.videoWidth) return;
+      if(!v || !v.videoWidth){ closeShot(); return; }
       flash();
-      var maxW = 360;
-      var k = Math.min(1, maxW / v.videoWidth);
+      var k = Math.min(1, 420 / v.videoWidth);
       var cv = document.createElement('canvas');
       cv.width = Math.round(v.videoWidth * k);
       cv.height = Math.round(v.videoHeight * k);
-      var ctx = cv.getContext('2d');
-      ctx.translate(cv.width, 0);
-      ctx.scale(-1, 1); // зеркалим, как в селфи-камере
-      ctx.drawImage(v, 0, 0, cv.width, cv.height);
-      shot = cv.toDataURL('image/jpeg', 0.7);
-      stopCam();
+      var c = cv.getContext('2d');
+      c.translate(cv.width, 0);
+      c.scale(-1, 1); // как в селфи-камере
+      c.drawImage(v, 0, 0, cv.width, cv.height);
+      shot = cv.toDataURL('image/jpeg', 0.72);
+      if(stream){ stream.getTracks().forEach(function(t){ t.stop(); }); stream = null; }
+      reveal();
       var nm = '';
       try { nm = localStorage.getItem('rea1527.name.v1') || ''; } catch(e){}
-      step('<img src="' + shot + '" alt="Ваш снимок">' +
-           '<input type="text" id="faceName" maxlength="30" placeholder="Как подписать" value="' +
-           nm.replace(/"/g, '&quot;') + '" style="max-width:240px;margin-bottom:10px">' +
-           '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
-           '<button class="pbtn go" data-act="post" type="button">Повесить на доску</button>' +
-           '<button class="pbtn" data-act="again" type="button">Переснять</button>' +
-           '<button class="pbtn" data-act="close" type="button">Удалить и выйти</button></div>');
+      panel('<img src="' + shot + '" alt="Ваш снимок">' +
+            '<input type="text" id="faceName" maxlength="30" placeholder="Ваше имя" value="' +
+            nm.replace(/"/g, '&quot;') + '" style="max-width:260px;margin-bottom:12px">' +
+            '<div class="row">' +
+            '<button class="pbtn go" data-act="post" type="button">Опубликовать</button>' +
+            '<button class="pbtn" data-act="again" type="button">Переснять</button>' +
+            '<button class="pbtn" data-act="close" type="button">Не публиковать</button></div>' +
+            '<p class="note" style="margin:10px 0 0">Снимок увидят все, кто откроет страницу.</p>');
     }
 
-    function postShot(){
+    function post(){
       if(!shot) return;
+      if(faces.length >= MAX_FACES){
+        panel('<p style="margin:0 0 12px">Все десять мест на доске заняты. Подождите, пока кто-нибудь снимет свой снимок.</p>' +
+              '<div class="row"><button class="pbtn" data-act="close" type="button">Понятно</button></div>');
+        return;
+      }
       var nameEl = document.getElementById('faceName');
       var name = ((nameEl && nameEl.value) || '').trim().slice(0, 30);
       try { localStorage.setItem('rea1527.name.v1', name); } catch(e){}
-      step('<p style="margin:0">Отправляю…</p>');
+      panel('<p style="margin:0">Отправляю…</p>');
       req('gallery', {
         method: 'POST',
         headers: { 'Prefer': 'return=representation' },
         body: JSON.stringify({ kind: 'face', author: ME, name: name || null, data: shot })
       }).then(function(){
-        shot = null;
-        closeCam();
+        closeShot();
         loadFaces();
-        var sec = document.getElementById('pochet');
-        if(sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if(hall) hall.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }).catch(function(e){
-        step('<p style="margin:0 0 10px">Не отправилось: ' + e.message + '</p>' +
-             '<button class="pbtn" data-act="close" type="button">Закрыть</button>');
+        panel('<p style="margin:0 0 12px">Не отправилось: ' + e.message + '</p>' +
+              '<div class="row"><button class="pbtn" data-act="close" type="button">Закрыть</button></div>');
       });
     }
 
-    camStep.addEventListener('click', function(e){
-      var b = e.target.closest('button[data-act]');
-      if(!b) return;
-      var act = b.dataset.act;
-      if(act === 'close') closeCam();
-      else if(act === 'start') startCam();
-      else if(act === 'shot') takeShot();
-      else if(act === 'again') startCam();
-      else if(act === 'post') postShot();
-    });
+    if(photoBtn) photoBtn.addEventListener('click', start);
+    window.addEventListener('pagehide', closeShot);
 
-    if(photoBtn){
-      photoBtn.addEventListener('click', function(){
-        var sec = document.getElementById('pochet');
-        askCam();
-        if(sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    fitPub();
+    showHall();
+    if(ready){
+      loadDrawings();
+      // прямой эфир: подтягиваем чужие рисунки и доску, пока вкладка открыта
+      setInterval(function(){
+        if(document.hidden) return;
+        loadDrawings();
+        if(!hall.hidden) loadFaces();
+      }, 20000);
+      document.addEventListener('visibilitychange', function(){
+        if(!document.hidden){ loadDrawings(); if(!hall.hidden) loadFaces(); }
       });
     }
-    window.addEventListener('pagehide', stopCam);
-
-    if(!ready){
-      gBox.innerHTML = '<div class="holder">Галерея подключается через Supabase.</div>';
-      faceBox.innerHTML = '<div class="holder" style="grid-column:1/-1">Доска почёта подключается через Supabase.</div>';
-      return;
-    }
-    loadGallery();
-    loadFaces();
   })();
 
   renderNow();

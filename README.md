@@ -22,18 +22,17 @@
 
 ### 1. Репозиторий и сайт
 
-Создать на github.com пустой публичный репозиторий `rea-board`, без README.
-Затем из этой папки:
+Репозиторий — https://github.com/LockerBig007/rea-board, `origin` уже прописан.
+Отправить из этой папки:
 
 ```bash
-git remote add origin https://github.com/ВАШ_ЛОГИН/rea-board.git
-git branch -M main
 git push -u origin main
 ```
 
 Дальше в репозитории: **Settings → Pages → Source: Deploy from a branch →
 Branch: `main`, папка `/ (root)` → Save.** Через минуту-две сайт будет по адресу
-`https://ВАШ_ЛОГИН.github.io/rea-board/` — эту ссылку и кидайте одногруппникам.
+**https://lockerbig007.github.io/rea-board/** — эту ссылку и кидайте одногруппникам.
+В адресе Pages логин всегда строчными буквами, это нормально.
 
 ### 2. Доска дедлайнов
 

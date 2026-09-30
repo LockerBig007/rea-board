@@ -287,7 +287,6 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
     <div class="kicker">15.27Д-С01/25б · 01.03.05 Статистика</div>
     <h1>Что сегодня, сколько баллов и когда дедлайн</h1>
     <p class="sub">Расписание всего семестра, калькулятор рейтинга по формуле РЭУ и общая доска дедлайнов. Одна страница на группу — открывайте с телефона.</p>
-    <p class="unofficial" id="stamp">Неофициальная страница, собрана студентами по данным student.rea.ru и rasp.rea.ru.</p>
   </div>
 
   <section id="now">
@@ -296,7 +295,6 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
     <div class="counts" id="counts"></div>
     <div class="card pad" id="todayCard"></div>
     <h3 style="font-size:15px;margin:22px 0 8px">Контрольные точки в расписании</h3>
-    <p class="lede" style="margin-bottom:10px">Зачёты и дифзачёты по этим предметам стоят до сессии — в январь они не уходят.</p>
     <div class="tw"><table id="tblChecks"><thead><tr><th>Дата</th><th>Предмет</th><th>Форма</th><th>Время и место</th><th class="n">Осталось</th></tr></thead><tbody></tbody></table></div>
   </section>
 
@@ -850,11 +848,6 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
     window.addEventListener('scroll', upd, { passive: true });
     upd();
   })();
-
-  var stamp = document.getElementById('stamp');
-  if(stamp && B.updated){
-    stamp.textContent = 'Неофициальная страница, собрана студентами по данным student.rea.ru и rasp.rea.ru. Расписание обновлено ' + B.updated + '; перед выходом из дома сверяйтесь с rasp.rea.ru.';
-  }
 
   /* ---------- тема оформления ---------- */
   (function(){

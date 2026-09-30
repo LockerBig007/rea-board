@@ -12,6 +12,7 @@ import json
 import os
 import re
 import sys
+import time
 from datetime import date
 
 import requests
@@ -58,18 +59,26 @@ PAIR_RE = re.compile(
 TASK_RE = re.compile(r"class='task'.*?>(.*?)</a>", re.S)
 
 
-def fetch(week):
-    r = requests.get(
-        URL,
-        params={"selection": GROUP, "weekNum": week, "catfilter": 0},
-        headers={"X-Requested-With": "XMLHttpRequest"},
-        timeout=30,
-    )
-    r.raise_for_status()
-    r.encoding = "utf-8"
-    if "не найдено результатов" in r.text:
-        raise RuntimeError(f"rasp.rea.ru не знает группу {GROUP}")
-    return r.text
+def fetch(week, tries=3):
+    # Сайт вуза иногда не отвечает на подряд идущие запросы, поэтому повтор с паузой.
+    last = None
+    for attempt in range(tries):
+        try:
+            r = requests.get(
+                URL,
+                params={"selection": GROUP, "weekNum": week, "catfilter": 0},
+                headers={"X-Requested-With": "XMLHttpRequest"},
+                timeout=30,
+            )
+            r.raise_for_status()
+            r.encoding = "utf-8"
+            if "не найдено результатов" in r.text:
+                raise RuntimeError(f"rasp.rea.ru не знает группу {GROUP}")
+            return r.text
+        except requests.RequestException as e:
+            last = e
+            time.sleep(3 * (attempt + 1))
+    raise RuntimeError(f"неделя {week}: {last}")
 
 
 def parse_week(page, week):
@@ -141,8 +150,10 @@ def main():
         ],
         "days": days,
     }
-    with open(OUT, "w", encoding="utf-8") as fh:
-        fh.write("window.BOARD=" + json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + ";")
+    with open(OUT, "w", encoding="ascii") as fh:
+        # ensure_ascii=True не случайно: файл остаётся чистым ASCII и читается
+        # правильно даже там, где сервер не прислал charset=utf-8.
+        fh.write("window.BOARD=" + json.dumps(payload, ensure_ascii=True, separators=(",", ":")) + ";")
 
     pairs = sum(len(d["s"]) for d in days)
     print(f"data.js обновлён: {len(days)} учебных дней, {pairs} занятий")

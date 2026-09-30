@@ -171,6 +171,30 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
   .day{grid-template-columns:1fr;gap:8px}
   .slot{grid-template-columns:70px 1fr;gap:10px}
 }
+/* ---- эффекты на чипах навигации ---- */
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:60;overflow:hidden;contain:strict}
+.fx-ghost{position:fixed;margin:0!important;pointer-events:none;will-change:transform,opacity}
+.fx-part{position:fixed;pointer-events:none;border-radius:2px;will-change:transform,opacity}
+.fx-num{position:fixed;pointer-events:none;font-family:var(--display);font-weight:600;white-space:nowrap;will-change:transform,opacity}
+.chip{transition:transform .12s cubic-bezier(.34,1.56,.64,1)}
+.chip:active{transform:scale(.93)}
+@keyframes fxshake{
+  0%{transform:translate3d(0,0,0) rotate(0)}
+  12%{transform:translate3d(-7px,3px,0) rotate(-.45deg)}
+  26%{transform:translate3d(8px,-4px,0) rotate(.5deg)}
+  40%{transform:translate3d(-6px,-2px,0) rotate(-.35deg)}
+  55%{transform:translate3d(5px,4px,0) rotate(.3deg)}
+  70%{transform:translate3d(-4px,-3px,0) rotate(-.2deg)}
+  85%{transform:translate3d(2px,2px,0) rotate(.1deg)}
+  100%{transform:translate3d(0,0,0) rotate(0)}
+}
+.fx-shake{animation:fxshake .6s cubic-bezier(.36,.07,.19,.97) both}
+@keyframes fxrow{0%{opacity:.25;transform:translateX(-10px)}100%{opacity:1;transform:none}}
+.fx-row{animation:fxrow .4s ease both}
+.fxbtn{font:inherit;font-size:12.5px;background:none;border:0;border-bottom:1px dashed var(--line-2);color:var(--ink-3);cursor:pointer;padding:0 0 1px}
+.fxbtn:hover{color:var(--accent);border-bottom-color:var(--accent)}
+@media (prefers-reduced-motion:reduce){.chip{transition:none}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -341,8 +365,11 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
   <footer>
     Данные учебного плана — из личного кабинета student.rea.ru, расписание — с rasp.rea.ru; оно обновляется автоматически раз в неделю.
     Страница неофициальная и университетом не поддерживается. Спорные баллы решаются с преподавателем и в дирекции, а не здесь.
+    <div style="margin-top:10px"><button class="fxbtn" id="fxToggle" type="button">Спокойный режим</button></div>
   </footer>
 </div>
+
+<div id="fx" aria-hidden="true"></div>
 
 <script src="config.js"></script>
 <script src="data.js"></script>
@@ -734,6 +761,209 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
   if(stamp && B.updated){
     stamp.textContent = 'Неофициальная страница, собрана студентами по данным student.rea.ru и rasp.rea.ru. Расписание обновлено ' + B.updated + '; перед выходом из дома сверяйтесь с rasp.rea.ru.';
   }
+
+  /* ---------- эффекты на чипах ---------- */
+  (function(){
+    var FXKEY = 'rea1527.fx.v1';
+    var layer = document.getElementById('fx');
+    var toggle = document.getElementById('fxToggle');
+    var quiet = false;
+    try { quiet = localStorage.getItem(FXKEY) === 'off'; } catch(e){}
+
+    function reduced(){
+      return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    }
+    function on(){ return !quiet && !reduced(); }
+
+    function paintToggle(){
+      if(!toggle) return;
+      toggle.textContent = quiet ? 'Включить анимации' : 'Спокойный режим';
+      toggle.title = quiet ? 'Вернуть эффекты на кнопках навигации' : 'Выключить эффекты на кнопках навигации';
+    }
+    if(toggle){
+      paintToggle();
+      toggle.addEventListener('click', function(){
+        quiet = !quiet;
+        try { localStorage.setItem(FXKEY, quiet ? 'off' : 'on'); } catch(e){}
+        paintToggle();
+        if(!quiet) pop(toggle);
+      });
+    }
+
+    function token(name){
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#888';
+    }
+    function rand(a, b){ return a + Math.random() * (b - a); }
+
+    // Копия чипа поверх страницы: настоящую кнопку не трогаем, вёрстка не едет.
+    function ghost(el){
+      var r = el.getBoundingClientRect();
+      var g = el.cloneNode(true);
+      g.removeAttribute('href');
+      g.removeAttribute('id');
+      g.classList.add('fx-ghost');
+      g.style.left = r.left + 'px';
+      g.style.top = r.top + 'px';
+      g.style.width = r.width + 'px';
+      g.style.height = r.height + 'px';
+      layer.appendChild(g);
+      return g;
+    }
+    function hide(el, ms){
+      el.style.visibility = 'hidden';
+      setTimeout(function(){ el.style.visibility = ''; pop(el); }, ms);
+    }
+    function pop(el){
+      if(!el.animate) return;
+      el.animate([
+        { transform: 'scale(.7)' },
+        { transform: 'scale(1.08)' },
+        { transform: 'scale(1)' }
+      ], { duration: 320, easing: 'cubic-bezier(.34,1.56,.64,1)' });
+    }
+
+    // «Сейчас» — отваливается и падает вниз
+    function fall(el){
+      var g = ghost(el), dir = Math.random() < 0.5 ? -1 : 1;
+      hide(el, 780);
+      var a = g.animate([
+        { transform: 'translate(0,0) rotate(0deg)', opacity: 1, offset: 0 },
+        { transform: 'translate(' + (dir * 6) + 'px,-10px) rotate(' + (dir * 5) + 'deg)', opacity: 1, offset: 0.18 },
+        { transform: 'translate(' + (dir * 40) + 'px,' + (window.innerHeight + 80) + 'px) rotate(' + (dir * 190) + 'deg)', opacity: 0.15, offset: 1 }
+      ], { duration: 760, easing: 'cubic-bezier(.45,0,.75,.3)' });
+      a.onfinish = function(){ g.remove(); };
+    }
+
+    // «Расписание» — взрывается
+    function explode(el){
+      var r = el.getBoundingClientRect();
+      var g = ghost(el);
+      hide(el, 620);
+      var a = g.animate([
+        { transform: 'scale(1)', opacity: 1 },
+        { transform: 'scale(1.25)', opacity: 0.9, offset: 0.25 },
+        { transform: 'scale(.2)', opacity: 0 }
+      ], { duration: 320, easing: 'ease-out' });
+      a.onfinish = function(){ g.remove(); };
+
+      var colors = [token('--accent'), token('--warn'), token('--ok'), token('--ink-2')];
+      var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      for(var i = 0; i < 22; i++){
+        (function(){
+          var p = document.createElement('div');
+          p.className = 'fx-part';
+          var size = rand(5, 11);
+          p.style.width = size + 'px';
+          p.style.height = size + 'px';
+          p.style.left = (cx - size / 2) + 'px';
+          p.style.top = (cy - size / 2) + 'px';
+          p.style.background = colors[i % colors.length];
+          layer.appendChild(p);
+          var ang = rand(0, Math.PI * 2), dist = rand(70, 190);
+          var pa = p.animate([
+            { transform: 'translate(0,0) scale(1)', opacity: 1 },
+            { transform: 'translate(' + (Math.cos(ang) * dist) + 'px,' + (Math.sin(ang) * dist + rand(40, 120)) + 'px) scale(.3) rotate(' + rand(-360, 360) + 'deg)', opacity: 0 }
+          ], { duration: rand(500, 850), easing: 'cubic-bezier(.2,.7,.4,1)' });
+          pa.onfinish = function(){ p.remove(); };
+        })();
+      }
+    }
+
+    // «Мои баллы» — трясёт всю страницу
+    function shake(){
+      ['header.top', '.wrap'].forEach(function(sel){
+        var node = document.querySelector(sel);
+        if(!node) return;
+        node.classList.remove('fx-shake');
+        void node.offsetWidth;
+        node.classList.add('fx-shake');
+        setTimeout(function(){ node.classList.remove('fx-shake'); }, 700);
+      });
+    }
+
+    // «Доска» — кнопка убегает и возвращается
+    function dodge(el){
+      if(!el.animate) return;
+      var dx = rand(40, 90) * (Math.random() < 0.5 ? -1 : 1);
+      var dy = rand(18, 40) * (Math.random() < 0.5 ? -1 : 1);
+      el.animate([
+        { transform: 'translate(0,0) rotate(0deg)' },
+        { transform: 'translate(' + dx + 'px,' + dy + 'px) rotate(' + (dx > 0 ? 12 : -12) + 'deg)', offset: 0.35 },
+        { transform: 'translate(' + (-dx * 0.28) + 'px,' + (-dy * 0.3) + 'px) rotate(' + (dx > 0 ? -5 : 5) + 'deg)', offset: 0.7 },
+        { transform: 'translate(0,0) rotate(0deg)' }
+      ], { duration: 620, easing: 'cubic-bezier(.34,1.4,.64,1)' });
+    }
+
+    // «Предметы» — переворот кнопки и каскад строк таблицы
+    function flip(el){
+      if(el.animate){
+        el.animate([
+          { transform: 'perspective(400px) rotateX(0deg)' },
+          { transform: 'perspective(400px) rotateX(360deg)' }
+        ], { duration: 560, easing: 'cubic-bezier(.5,0,.3,1)' });
+      }
+      var rows = document.querySelectorAll('#tblSubj tbody tr');
+      Array.prototype.forEach.call(rows, function(tr, i){
+        tr.classList.remove('fx-row');
+        void tr.offsetWidth;
+        tr.style.animationDelay = (i * 45) + 'ms';
+        tr.classList.add('fx-row');
+        setTimeout(function(){
+          tr.classList.remove('fx-row');
+          tr.style.animationDelay = '';
+        }, 500 + i * 45);
+      });
+    }
+
+    // «Как считают» — из кнопки сыплются баллы
+    function rain(el){
+      var r = el.getBoundingClientRect();
+      var vals = ['20', '20', '20', '40', '100', '50', '85', '70'];
+      var colors = [token('--accent'), token('--ok'), token('--warn')];
+      for(var i = 0; i < vals.length; i++){
+        (function(i){
+          var n = document.createElement('div');
+          n.className = 'fx-num';
+          n.textContent = vals[i];
+          n.style.left = (r.left + rand(4, Math.max(8, r.width - 16))) + 'px';
+          n.style.top = (r.top + r.height / 2) + 'px';
+          n.style.color = colors[i % colors.length];
+          n.style.fontSize = rand(13, 22).toFixed(0) + 'px';
+          layer.appendChild(n);
+          var na = n.animate([
+            { transform: 'translateY(0) scale(.6)', opacity: 0 },
+            { transform: 'translateY(-' + rand(14, 30) + 'px) scale(1)', opacity: 1, offset: 0.2 },
+            { transform: 'translateY(' + rand(120, 230) + 'px) scale(.85)', opacity: 0 }
+          ], { duration: rand(750, 1150), easing: 'cubic-bezier(.3,.6,.5,1)', delay: i * 55 });
+          na.onfinish = function(){ n.remove(); };
+        })(i);
+      }
+      if(el.animate){
+        el.animate([
+          { transform: 'scale(1)' },
+          { transform: 'scale(1.12)' },
+          { transform: 'scale(1)' }
+        ], { duration: 420, easing: 'ease-out' });
+      }
+    }
+
+    var FX = {
+      '#now': fall,
+      '#rasp': explode,
+      '#ball': shake,
+      '#doska': dodge,
+      '#predmety': flip,
+      '#kak': rain
+    };
+
+    Array.prototype.forEach.call(document.querySelectorAll('nav.chips .chip'), function(a){
+      a.addEventListener('click', function(){
+        if(!on() || !layer) return;
+        var fn = FX[a.getAttribute('href')];
+        if(fn) fn(a);
+      });
+    });
+  })();
 
   renderNow();
   renderWeek();

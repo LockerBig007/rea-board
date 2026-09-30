@@ -415,7 +415,7 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
             <dt>Приём документов</dt><dd>каб. 116, корпус 3</dd>
           </dl>
           <p class="note" style="margin-top:12px">Личный кабинет: <a href="https://student.rea.ru/rating/" target="_blank" rel="noopener">student.rea.ru/rating</a> — там видно, что уже проставили преподаватели. Расписание: <a href="https://rasp.rea.ru/" target="_blank" rel="noopener">rasp.rea.ru</a>. Уведомления шлёт бот <code class="cp">@REA_Student_info_bot</code>, привязывается в разделе «Личные данные».</p>
-          <button class="minibtn" id="photoBtn" type="button">Фотка</button>
+          <button class="minibtn" id="photoBtn" type="button">Обезьяна</button>
         </div>
       </div>
     </div>
@@ -1883,7 +1883,8 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
         panel('<p style="margin:0 0 12px">Этот браузер не даёт доступ к камере.</p><div class="row"><button class="pbtn" data-act="close" type="button">Закрыть</button></div>');
         return;
       }
-      panel('<p style="margin:0">Включаю камеру…</p>');
+      // Панель до этого момента не показываем: человек нажал кнопку и сразу
+      // видит системный запрос доступа, а дальше три-два-один и снимок.
       navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 720 } }, audio: false })
         .then(function(st){
           stream = st;
@@ -1928,10 +1929,9 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
             '<input type="text" id="faceName" maxlength="30" placeholder="Ваше имя" value="' +
             nm.replace(/"/g, '&quot;') + '" style="max-width:260px;margin-bottom:12px">' +
             '<div class="row">' +
-            '<button class="pbtn go" data-act="post" type="button">Опубликовать</button>' +
+            '<button class="pbtn go" data-act="post" type="button">Опубликовать на доску почёта</button>' +
             '<button class="pbtn" data-act="again" type="button">Переснять</button>' +
-            '<button class="pbtn" data-act="close" type="button">Не публиковать</button></div>' +
-            '<p class="note" style="margin:10px 0 0">Снимок увидят все, кто откроет страницу.</p>');
+            '<button class="pbtn" data-act="close" type="button">Не публиковать</button></div>');
     }
 
     function post(){

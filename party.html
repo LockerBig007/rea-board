@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Зал</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body {
+    background: #000;
+    color: #fff;
+    font: 16px/1.45 -apple-system, "Segoe UI", Roboto, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px 16px;
+    user-select: none;
+    transition: background-color .09s linear;
+  }
+  body.lit { color: #000; }
+
+  .shade { transition: opacity .2s; }
+  body.lit .shade { opacity: .55; }
+
+  h1 { font-size: 26px; margin: 0 0 6px; letter-spacing: -.5px; }
+  p  { margin: 0 0 18px; font-size: 15px; max-width: 22em; }
+  .muted { opacity: .6; font-size: 13px; }
+
+  button {
+    font: inherit;
+    font-weight: 700;
+    color: inherit;
+    border: 0;
+    border-radius: 18px;
+    padding: 18px 26px;
+    background: #fff;
+    color: #000;
+    cursor: pointer;
+  }
+  button:active { transform: scale(.97); }
+
+  #join { font-size: 20px; padding: 22px 40px; border-radius: 24px; }
+
+  #stage { display: none; flex-direction: column; align-items: center; gap: 18px; }
+  #stage.on { display: flex; }
+
+  #bang {
+    width: 190px; height: 190px; border-radius: 50%;
+    font-size: 26px; letter-spacing: 1px;
+    background: #ff2d4b; color: #fff;
+    box-shadow: 0 0 0 10px rgba(255,45,75,.18);
+  }
+  #bang[hidden] { display: none; }
+
+  #who { font-size: 18px; font-weight: 700; }
+  #status { font-size: 13px; opacity: .6; }
+  #hint { font-size: 12px; opacity: .5; max-width: 20em; }
+
+  .flash { position: fixed; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <h1>Световое шоу</h1>
+  <p>Телефон станет частью зала: экран будет менять цвет и звучать по сигналу со сцены.</p>
+  <button id="join">Я в игре</button>
+  <p class="muted" id="gatehint" style="margin-top:18px">Нажми — и дальше ничего делать не надо.<br>Телефон не блокируй.</p>
+</div>
+
+<div id="stage">
+  <div id="who" class="shade"></div>
+  <button id="bang" hidden>БАБАХ</button>
+  <div id="status" class="shade">подключаюсь…</div>
+  <div id="hint" class="shade"></div>
+</div>
+
+<div class="flash" id="flash"></div>
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="party-core.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var tg = window.Telegram && window.Telegram.WebApp;
+  var isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+
+  var body = document.body;
+  var gate = document.getElementById("gate");
+  var stage = document.getElementById("stage");
+  var flash = document.getElementById("flash");
+  var bang = document.getElementById("bang");
+
+  var me = { slot: -1, total: 0 };
+  var link = null;
+  var baseColor = "#000000";
+  var strobeTimer = null;
+  var lastPulse = 0;
+
+  /* ------------------------------------------------------- Телеграм-обёртка */
+
+  function tgName() {
+    try {
+      var u = tg.initDataUnsafe.user;
+      // Имя только для подписи на экране у ведущего, поэтому непроверенного
+      // initDataUnsafe достаточно: ничего, кроме надписи, от него не зависит.
+      return [u.first_name, u.last_name].filter(Boolean).join(" ") || u.username;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function setupTelegram() {
+    if (!tg) return;
+    try { tg.ready(); tg.expand(); } catch (e) {}
+    try { tg.requestFullscreen(); } catch (e) {}
+    try { tg.disableVerticalSwipes(); } catch (e) {}
+    try { tg.setHeaderColor("#000000"); tg.setBackgroundColor("#000000"); } catch (e) {}
+  }
+
+  function buzz(strength) {
+    try { tg.HapticFeedback.impactOccurred(strength || "medium"); return; } catch (e) {}
+    try { navigator.vibrate(strength === "heavy" ? 90 : 35); } catch (e) {}
+  }
+
+  /* ---------------------------------------------------------------- картинка */
+
+  function paint(css) {
+    baseColor = css;
+    body.style.backgroundColor = css;
+    var lit = css !== "#000000" && css !== "#000";
+    body.classList.toggle("lit", lit);
+    try { tg.setBackgroundColor(css); tg.setHeaderColor(css); } catch (e) {}
+  }
+
+  function blink(css, ms) {
+    flash.style.background = css || "#fff";
+    flash.style.transition = "none";
+    flash.style.opacity = "1";
+    setTimeout(function () {
+      flash.style.transition = "opacity " + (ms || 140) + "ms linear";
+      flash.style.opacity = "0";
+    }, 20);
+  }
+
+  function hsl(i, total) {
+    return "hsl(" + Math.round((i / Math.max(1, total)) * 360) + " 100% 55%)";
+  }
+
+  function at(localAt, fn) {
+    var wait = localAt ? localAt - Date.now() : 0;
+    if (!(wait > 0) || wait > 5000) fn();
+    else setTimeout(fn, wait);
+  }
+
+  /* ------------------------------------------------------------- приём сцены */
+
+  function onFx(p) {
+    if (p.kind === "lock") {
+      bang.hidden = !!p.value;
+      return;
+    }
+    if (p.kind === "color") {
+      at(p.localAt, function () { paint(p.css); buzz("light"); });
+      return;
+    }
+    if (p.kind === "off") {
+      clearInterval(strobeTimer);
+      at(p.localAt, function () { paint("#000000"); });
+      return;
+    }
+    if (p.kind === "flash") {
+      at(p.localAt, function () { blink("#ffffff", 180); buzz("heavy"); });
+      return;
+    }
+    if (p.kind === "pulse") {
+      // Когда зал жмёт кнопку наперегонки, вспышки сливаются в мельтешение.
+      // Поэтому принимаем не чаще раза в треть секунды.
+      if (Date.now() - lastPulse < 350) return;
+      lastPulse = Date.now();
+      at(p.localAt, function () { blink("#ffffff", 110); buzz("light"); window.Party.play("tick"); });
+      return;
+    }
+    if (p.kind === "strobe") {
+      clearInterval(strobeTimer);
+      at(p.localAt, function () {
+        var left = Math.min(14, p.times || 10);
+        var on = false;
+        var gap = Math.max(150, p.interval || 170); // не частим: мельтешение опасно
+        strobeTimer = setInterval(function () {
+          on = !on;
+          body.style.backgroundColor = on ? (p.css || "#ffffff") : "#000000";
+          if (on) buzz("light");
+          if (--left <= 0) { clearInterval(strobeTimer); paint(baseColor); }
+        }, gap);
+      });
+      return;
+    }
+    if (p.kind === "rainbow") {
+      at(p.localAt, function () { paint(hsl(me.slot < 0 ? 0 : me.slot, me.total)); buzz("light"); });
+      return;
+    }
+    if (p.kind === "wave") {
+      // Своя задержка у каждого телефона — по месту в списке подключившихся.
+      var step = p.step || 120;
+      var mine = (p.localAt || Date.now()) + Math.max(0, me.slot) * step;
+      at(mine, function () {
+        paint(p.css || "#ffffff");
+        buzz("medium");
+        setTimeout(function () { paint("#000000"); }, p.hold || 420);
+      });
+      return;
+    }
+    if (p.kind === "sparkle") {
+      var spread = p.spread || 1400;
+      for (var i = 0; i < 6; i++) {
+        setTimeout(function () {
+          blink(hsl(Math.random() * 10, 10), 200);
+        }, Math.random() * spread);
+      }
+      return;
+    }
+    if (p.kind === "sound") {
+      // Звук ставим в очередь Web Audio сразу, на точный момент: его часы
+      // точнее таймеров, и запас в полсекунды тут как раз и отрабатывает.
+      if (window.Party.play(p.sound, p.localAt)) at(p.localAt, function () { buzz("heavy"); });
+      return;
+    }
+  }
+
+  /* ------------------------------------------------------------------ запуск */
+
+  setupTelegram();
+
+  document.getElementById("join").addEventListener("click", function () {
+    window.Party.unlock().then(function (ok) {
+      gate.style.display = "none";
+      stage.classList.add("on");
+
+      var name = tgName();
+      document.getElementById("who").textContent = name ? "Ты в игре, " + name : "Ты в игре";
+
+      var hint = [];
+      if (!ok) hint.push("Звук не включился — закрой и открой приложение заново.");
+      else if (isIOS) hint.push("Чтобы слышать звук, выключи беззвучный режим (переключатель сбоку).");
+      hint.push("Экран не гасить и не выходить.");
+      document.getElementById("hint").innerHTML = hint.join("<br>");
+
+      // Экран должен гореть всё выступление. Разрешение дают не все браузеры —
+      // отказ не ломает ничего, просто телефон погаснет сам.
+      try { navigator.wakeLock.request("screen").catch(function () {}); } catch (e) {}
+
+      link = window.Party.connect({
+        role: "phone",
+        name: name || "гость",
+        onFx: onFx,
+        onPeers: function (info) {
+          me = info;
+          document.getElementById("status").textContent =
+            "в зале " + info.total + (info.total === 1 ? " телефон" : info.total < 5 ? " телефона" : " телефонов");
+        },
+        onStatus: function (s) {
+          if (s === "no-config") {
+            document.getElementById("status").textContent = "нет настроек Supabase в config.js";
+          } else if (s !== "online") {
+            document.getElementById("status").textContent = "связь теряется…";
+          }
+        }
+      });
+
+      window.Party.play("tick");
+      buzz("medium");
+    });
+  });
+
+  bang.addEventListener("click", function () {
+    if (!link) return;
+    link.send({ kind: "pulse", at: Date.now() + 120, from: tgName() || "кто-то" });
+    blink("#ffffff", 110);
+    buzz("heavy");
+    window.Party.play("tick");
+  });
+})();
+</script>
+</body>
+</html>

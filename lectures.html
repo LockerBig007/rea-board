@@ -25,7 +25,6 @@
   .subj:hover{border-color:var(--accent)}
   .subj .nm{flex:1;min-width:0}
   .subj .nm b{display:block;font-size:16px;font-weight:600}
-  .subj .nm small{color:var(--ink-3);font-size:12.5px}
   .subj .cnt{font-size:13px;color:var(--ink-2);background:var(--card-2);border:1px solid var(--line);border-radius:999px;padding:4px 11px;white-space:nowrap}
   .subj.has .cnt{background:var(--ok-soft);border-color:transparent;color:var(--ok)}
   .subj .arrow{color:var(--ink-3);transition:transform .18s}
@@ -67,9 +66,7 @@
 <div class="wrap">
 
   <div class="hero">
-    <div class="kicker">Конспекты группы</div>
     <h1>Лекции</h1>
-    <p class="sub">Всё, что уже оцифровано, лежит здесь по предметам. Нажми на предмет — раскроется список его лекций.</p>
   </div>
 
   <div class="stat" id="stat"></div>
@@ -160,11 +157,10 @@
     btn.className = "subj" + (has ? " has" : " empty-subj");
     btn.setAttribute("aria-expanded", "false");
     btn.innerHTML =
-      '<span class="nm"><b></b><small></small></span>' +
+      '<span class="nm"><b></b></span>' +
       '<span class="cnt"></span>' +
       '<span class="arrow">›</span>';
     btn.querySelector("b").textContent = sh.name;
-    btn.querySelector("small").textContent = sh.full !== sh.name ? sh.full : "";
     btn.querySelector(".cnt").textContent = has
       ? sh.items.length + " " + plural(sh.items.length, "лекция", "лекции", "лекций")
       : "пока пусто";

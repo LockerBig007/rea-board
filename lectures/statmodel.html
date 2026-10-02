@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ru">
+<html lang="ru" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -23,6 +23,12 @@ img{max-width:100%}
 </style>
 </head>
 <body>
+<nav class="sitebar">
+  <a href="https://lockerbig007.github.io/rea-board/">Борд 15.27Д</a>
+  <a href="https://lockerbig007.github.io/rea-board/lectures.html">Все лекции</a>
+  <a class="get" href="https://lockerbig007.github.io/rea-board/lectures/statmodel.pdf" download>Скачать PDF</a>
+</nav>
+
 <style>
 /* Layout: growing lecture archive — sticky lecture nav, each lecture a dated block of definition cards and lists */
 :root{
@@ -140,18 +146,6 @@ html{scroll-behavior:smooth}
 </style>
 
 <div class="wrap">
-<style>
-.sitebar{display:flex;gap:16px;flex-wrap:wrap;padding:12px 0 10px;border-bottom:1px solid var(--line);font-family:var(--sans);font-size:13px}
-.sitebar a{color:var(--muted);text-decoration:none}
-.sitebar a:hover{color:var(--accent)}
-@media print{.sitebar{display:none}}
-</style>
-<nav class="sitebar">
-  <a href="https://lockerbig007.github.io/rea-board/">Борд 15.27Д</a>
-  <a href="https://lockerbig007.github.io/rea-board/lectures.html">Все лекции</a>
-  <a href="https://lockerbig007.github.io/rea-board/lectures/statmodel.html" download="Статмоделирование — конспект.html">Скачать себе</a>
-</nav>
-
 
 <header class="masthead">
   <p class="kicker">Статистическое моделирование · конспект лекций</p>
@@ -824,5 +818,180 @@ html{scroll-behavior:smooth}
 </footer>
 
 </div>
+
+<style>
+/* Лист бумаги вместо бесконечной ленты: конспект читается как документ. */
+body{background:#e5e8e4}
+.sitebar{display:flex;gap:16px;flex-wrap:wrap;align-items:center;
+  max-width:794px;margin:0 auto;padding:14px 16px 10px;
+  font-family:var(--sans);font-size:13px}
+.sitebar a{color:var(--muted);text-decoration:none}
+.sitebar a:hover{color:var(--accent)}
+.sitebar .get{margin-left:auto;color:var(--accent);font-weight:500}
+
+.wrap.paged{max-width:none;padding:0}
+.pages{display:flex;flex-direction:column;align-items:center;gap:20px;padding-bottom:40px}
+.page{position:relative;width:794px;height:1122px;padding:60px 60px 72px;
+  background:var(--surface);border-radius:2px;
+  box-shadow:0 1px 3px rgba(24,29,28,.16),0 12px 30px rgba(24,29,28,.10)}
+.page.tall{height:auto;padding-bottom:72px}
+.page-num{position:absolute;left:0;right:0;bottom:26px;text-align:center;
+  font-family:var(--sans);font-size:11px;color:var(--muted)}
+.page > .page-body > :first-child{margin-top:0}
+
+/* На телефоне листы A4 нечитаемы — там обычная лента. */
+@media (max-width:899px){
+  body{background:var(--bg)}
+  .pages{gap:0;padding-bottom:0}
+  .page{width:auto;height:auto;padding:18px 16px;box-shadow:none;border-radius:0}
+  .page-num{display:none}
+  .sitebar{max-width:none}
+}
+
+@media print{
+  @page{size:A4;margin:0}
+  body{background:#fff}
+  .sitebar{display:none}
+  .pages{gap:0;padding:0}
+  .page{width:210mm;height:auto;min-height:0;padding:16mm 16mm 18mm;
+    box-shadow:none;border-radius:0;break-after:page}
+  .page:last-child{break-after:auto}
+}
+</style>
+
+<script>
+(function () {
+  "use strict";
+
+  // Лист A4 при 96 точках на дюйм — 1122 точки. В MAX_H заложен запас: без
+  // него лист, набитый под завязку, выдавливает в PDF лишнюю пустую страницу.
+  var MAX_H = 950;
+  var MIN_WIDTH = 900;
+
+  var wrap = document.querySelector(".wrap");
+  if (!wrap) return;
+  var original = Array.prototype.slice.call(wrap.children);
+
+  // Лекция, не поместившаяся на лист, продолжается на следующем такой же
+  // оболочкой <section>: без неё поехали бы отступы и стили заголовков.
+  function unpage() {
+    var pages = wrap.querySelector(".pages");
+    if (!pages) return;
+    original.forEach(function (el) {
+      if (el.shells) {
+        el.shells.forEach(function (shell) {
+          while (shell.firstChild) el.appendChild(shell.firstChild);
+        });
+        el.shells = null;
+      }
+      wrap.appendChild(el);
+    });
+    pages.remove();
+    wrap.classList.remove("paged");
+  }
+
+  function paginate() {
+    unpage();
+    if (document.documentElement.clientWidth < MIN_WIDTH) return;
+
+    var pages = document.createElement("div");
+    pages.className = "pages";
+    wrap.classList.add("paged");
+    wrap.appendChild(pages);
+
+    var body = null;
+
+    function newPage() {
+      var page = document.createElement("div");
+      page.className = "page";
+      body = document.createElement("div");
+      body.className = "page-body";
+      page.appendChild(body);
+      pages.appendChild(page);
+      return body;
+    }
+
+    function overflows() { return body.scrollHeight > MAX_H; }
+
+    newPage();
+
+    original.forEach(function (el) {
+      if (el.tagName !== "SECTION") {
+        body.appendChild(el);
+        if (overflows() && body.children.length > 1) {
+          body.removeChild(el);
+          newPage();
+          body.appendChild(el);
+        }
+        return;
+      }
+
+      // Каждая лекция начинается с нового листа, как глава в книге.
+      if (body.children.length) newPage();
+
+      var shells = [];
+      el.shells = shells;
+
+      function addShell(first) {
+        var shell = el.cloneNode(false);
+        if (!first) shell.removeAttribute("id");  // якорь — на первом листе лекции
+        shell.owner = el;
+        shells.push(shell);
+        return shell;
+      }
+
+      var shell = addShell(true);
+      body.appendChild(shell);
+
+      Array.prototype.slice.call(el.children).forEach(function (block) {
+        shell.appendChild(block);
+        if (!overflows()) return;
+        if (shell.children.length === 1) return; // блок сам выше листа — пусть будет
+        shell.removeChild(block);
+        shell = addShell(false);
+        newPage().appendChild(shell);
+        shell.appendChild(block);
+      });
+
+      el.remove(); // опустевшая исходная секция, иначе торчит пустой полосой
+    });
+
+    // Заголовок, оставшийся внизу листа без текста под ним, переносим дальше —
+    // но только внутри своей лекции, иначе он уедет в чужую.
+    Array.prototype.slice.call(pages.children).forEach(function (page, i, all) {
+      if (i === all.length - 1) return;
+      var host = page.querySelector(".page-body > section");
+      var next = all[i + 1].querySelector(".page-body > section");
+      if (!host || !next || host.owner !== next.owner) return;
+      var last = host.lastElementChild;
+      if (!last || !/^H[23]$/.test(last.tagName) || host.children.length < 2) return;
+      next.insertBefore(last, next.firstChild);
+    });
+
+    Array.prototype.slice.call(pages.children).forEach(function (page, i) {
+      if (page.firstChild.scrollHeight > MAX_H) page.classList.add("tall");
+      var num = document.createElement("div");
+      num.className = "page-num";
+      num.textContent = i + 1;
+      page.appendChild(num);
+    });
+  }
+
+  function run() {
+    // Шрифты меняют высоту текста, поэтому раскладываем после их загрузки.
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(paginate);
+    else paginate();
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", run);
+  else run();
+
+  var t;
+  window.addEventListener("resize", function () {
+    clearTimeout(t);
+    t = setTimeout(paginate, 250);
+  });
+})();
+</script>
 </body>
 </html>

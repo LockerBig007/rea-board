@@ -196,10 +196,10 @@
 
         var dl = document.createElement("a");
         dl.className = "dl";
-        dl.href = lec.file;
+        dl.href = lec.pdf || lec.file;
         dl.setAttribute("download", "");
-        dl.textContent = "скачать";
-        dl.title = "Сохранить к себе: файл открывается и без интернета";
+        dl.textContent = lec.pdf ? "скачать PDF" : "скачать";
+        dl.title = "Сохранить к себе и читать без интернета";
         li.appendChild(dl);
 
         ul.appendChild(li);

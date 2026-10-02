@@ -182,13 +182,13 @@
       ul.appendChild(li);
     } else {
       sh.items.forEach(function (lec) {
-        // Готовая свёрстанная страница открывается как есть, конспект в .md —
-        // через читалку. Скачать можно и то и другое.
-        var ready = /\.html?$/i.test(lec.file);
+        // PDF и свёрстанная страница открываются как есть, конспект в .md —
+        // через читалку. Скачать можно любой из них.
+        var direct = /\.(html?|pdf)$/i.test(lec.file);
 
         var li = document.createElement("li");
         var a = document.createElement("a");
-        a.href = ready ? lec.file : "lecture.html?f=" + encodeURIComponent(lec.file);
+        a.href = direct ? lec.file : "lecture.html?f=" + encodeURIComponent(lec.file);
         a.innerHTML = '<span class="t"></span><span class="d"></span>';
         a.querySelector(".t").textContent = lec.title || lec.file;
         a.querySelector(".d").textContent = lec.date || "";

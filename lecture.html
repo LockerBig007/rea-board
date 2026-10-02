@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="robots" content="noindex">
+<title>Лекция · Борд 15.27Д</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Unbounded:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<link rel="stylesheet" href="site.css">
+<style>
+  .doc{max-width:74ch;margin:0 auto}
+  .meta{color:var(--ink-3);font-size:13px;margin:10px 0 0;display:flex;gap:14px;flex-wrap:wrap}
+  .body{font-size:17px;line-height:1.72;margin-top:28px}
+  .body h1{font-family:var(--display);font-size:clamp(21px,3.6vw,27px);letter-spacing:-.02em;line-height:1.25;margin:34px 0 12px}
+  .body h2{font-family:var(--display);font-size:20px;margin:30px 0 10px;letter-spacing:-.01em}
+  .body h3{font-size:17px;margin:24px 0 8px}
+  .body p{margin:0 0 14px}
+  .body ul,.body ol{margin:0 0 16px;padding-left:24px}
+  .body li{margin-bottom:6px}
+  .body blockquote{margin:18px 0;padding:12px 16px;background:var(--accent-soft);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;color:var(--accent-ink)}
+  .body blockquote p:last-child{margin:0}
+  .body code{background:var(--card-2);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:.9em}
+  .body pre{background:var(--card-2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;overflow:auto}
+  .body pre code{background:none;border:0;padding:0}
+  .body table{width:100%;border-collapse:collapse;margin:0 0 18px;font-size:15px}
+  .body th,.body td{border:1px solid var(--line);padding:8px 10px;text-align:left}
+  .body th{background:var(--card-2);font-weight:600}
+  .body hr{border:0;border-top:1px solid var(--line);margin:28px 0}
+  .body img{display:block;margin:18px auto;box-shadow:var(--shadow)}
+
+  .tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:28px;padding-top:18px;border-top:1px solid var(--line)}
+  .msg{margin-top:28px}
+
+  @media print{
+    header.top,.tools,.back{display:none}
+    body{background:#fff;color:#000}
+    .wrap{padding:0}
+    .body{font-size:12pt}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="index.html">Борд 15.27Д <span>· 3-й семестр</span></a>
+    <nav class="chips">
+      <a class="chip" href="index.html">Главная</a>
+      <a class="chip on" href="lectures.html">Лекции</a>
+      <a class="chip" href="party-control.html">Шоу</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="doc">
+    <div class="hero">
+      <div class="kicker" id="kicker">Лекция</div>
+      <h1 id="title">Загружаю…</h1>
+      <div class="meta" id="meta"></div>
+    </div>
+
+    <div class="body" id="body"></div>
+    <div class="msg" id="msg"></div>
+
+    <div class="tools">
+      <button class="chip" type="button" id="printBtn">Распечатать</button>
+      <a class="chip" href="lectures.html">Все лекции</a>
+    </div>
+
+    <a class="back" href="lectures.html">← К списку лекций</a>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<script src="data.js"></script>
+<script src="lectures.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var titleEl = document.getElementById("title");
+  var bodyEl = document.getElementById("body");
+  var msgEl = document.getElementById("msg");
+
+  function fail(text) {
+    titleEl.textContent = "Лекция не открылась";
+    msgEl.innerHTML = '<div class="card pad lede"></div>';
+    msgEl.querySelector("div").textContent = text;
+  }
+
+  var file = new URLSearchParams(location.search).get("f") || "";
+
+  // Открываем только файлы из папки lectures: адрес приходит из ссылки,
+  // и тянуть по нему что попало со стороны страница не должна.
+  if (!/^lectures\/[A-Za-z0-9_\-/.]+\.md$/.test(file) || file.indexOf("..") >= 0) {
+    fail("Неверный адрес файла. Вернись к списку и открой лекцию оттуда.");
+    return;
+  }
+
+  var meta = (window.LECTURES || []).filter(function (l) { return l.file === file; })[0] || {};
+
+  fetch(file, { cache: "no-cache" })
+    .then(function (r) {
+      if (!r.ok) throw new Error(r.status === 404 ? "404" : "http " + r.status);
+      return r.text();
+    })
+    .then(function (md) {
+      // Заголовок берём из реестра, а если там пусто — из первой строки «# ».
+      var h1 = /^#\s+(.+)$/m.exec(md);
+      var name = meta.title || (h1 && h1[1]) || "Лекция";
+      document.title = name + " · Борд 15.27Д";
+      titleEl.textContent = name;
+
+      if (meta.subject) document.getElementById("kicker").textContent = meta.subject;
+
+      var bits = [];
+      if (meta.date) bits.push(meta.date);
+      if (meta.note) bits.push(meta.note);
+      document.getElementById("meta").textContent = bits.join(" · ");
+
+      // Если первая строка — тот же заголовок, не повторяем его в тексте.
+      if (h1 && h1[1] === name) md = md.replace(/^#\s+.+$/m, "");
+
+      bodyEl.innerHTML = window.marked.parse(md, { breaks: true, gfm: true });
+
+      if (window.renderMathInElement) {
+        try {
+          window.renderMathInElement(bodyEl, {
+            delimiters: [
+              { left: "$$", right: "$$", display: true },
+              { left: "\\[", right: "\\]", display: true },
+              { left: "$", right: "$", display: false },
+              { left: "\\(", right: "\\)", display: false }
+            ],
+            throwOnError: false
+          });
+        } catch (e) {}
+      }
+    })
+    .catch(function (e) {
+      fail(String(e.message) === "404"
+        ? "Файла " + file + " нет в папке lectures. Проверь имя в lectures.js."
+        : "Не удалось загрузить файл: " + e.message);
+    });
+
+  document.getElementById("printBtn").addEventListener("click", function () { window.print(); });
+})();
+</script>
+</body>
+</html>

@@ -73,6 +73,13 @@ h1{font-family:var(--display);font-weight:600;font-size:clamp(26px,5.2vw,40px);l
 .sub{color:var(--ink-2);max-width:62ch}
 .unofficial{margin-top:10px;font-size:12.5px;color:var(--ink-3)}
 
+/* разделы сайта: плитки на отдельные страницы */
+.hub{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin:22px 0 4px}
+.hub a{display:block;padding:15px 16px;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);text-decoration:none;color:var(--ink)}
+.hub a:hover{border-color:var(--accent)}
+.hub b{display:block;font-size:16px;font-weight:600}
+.hub small{display:block;color:var(--ink-3);font-size:12.5px;margin-top:3px}
+
 section{padding-block:30px;scroll-margin-top:104px}
 section>h2{font-family:var(--display);font-weight:600;font-size:19px;letter-spacing:-.01em;margin-bottom:4px}
 .lede{color:var(--ink-2);font-size:14px;margin:0 0 16px;max-width:66ch}
@@ -275,6 +282,7 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
       <a class="chip" href="#doska">Доска</a>
       <a class="chip" href="#predmety">Предметы</a>
       <a class="chip" href="#kak">Как считают</a>
+      <a class="chip" href="lectures.html">Лекции →</a>
     </nav>
     <button class="tbtn" id="themeBtn" type="button" title="Тема оформления">◐ Авто</button>
     <button class="tbtn" id="fxToggle" type="button" title="Эффекты на кнопках">Эффекты</button>
@@ -287,6 +295,17 @@ footer{color:var(--ink-3);font-size:12.5px;padding-block:24px;border-top:1px sol
     <div class="kicker">15.27Д-С01/25б · 01.03.05 Статистика</div>
     <h1>Что сегодня, сколько баллов и когда дедлайн</h1>
     <p class="sub">Расписание всего семестра, калькулятор рейтинга по формуле РЭУ и общая доска дедлайнов. Одна страница на группу — открывайте с телефона.</p>
+  </div>
+
+  <div class="hub">
+    <a href="lectures.html">
+      <b>Лекции →</b>
+      <small>Оцифрованные конспекты по предметам</small>
+    </a>
+    <a href="party.html">
+      <b>Световое шоу →</b>
+      <small>Телефоны зала светятся и звучат вместе</small>
+    </a>
   </div>
 
   <section id="now">

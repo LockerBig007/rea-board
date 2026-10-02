@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Оцифрованные конспекты лекций группы 15.27Д-С01/25б.">
+<meta name="color-scheme" content="light dark">
+<meta name="robots" content="noindex">
+<title>Лекции · Борд 15.27Д</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Unbounded:wght@400;600&display=swap">
+<link rel="stylesheet" href="site.css">
+<style>
+  .stat{display:flex;gap:10px;flex-wrap:wrap;margin:22px 0 18px}
+  .stat .box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;min-width:140px}
+  .stat b{font-family:var(--display);font-size:22px;display:block;line-height:1.1}
+  .stat small{color:var(--ink-3);font-size:12px}
+
+  .shelf{margin-top:10px}
+  .subj{
+    width:100%;text-align:left;font:inherit;cursor:pointer;
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:15px 16px;margin-bottom:8px;display:flex;align-items:center;gap:14px;
+    box-shadow:var(--shadow);color:var(--ink);
+  }
+  .subj:hover{border-color:var(--accent)}
+  .subj .nm{flex:1;min-width:0}
+  .subj .nm b{display:block;font-size:16px;font-weight:600}
+  .subj .nm small{color:var(--ink-3);font-size:12.5px}
+  .subj .cnt{font-size:13px;color:var(--ink-2);background:var(--card-2);border:1px solid var(--line);border-radius:999px;padding:4px 11px;white-space:nowrap}
+  .subj.has .cnt{background:var(--ok-soft);border-color:transparent;color:var(--ok)}
+  .subj .arrow{color:var(--ink-3);transition:transform .18s}
+  .subj[aria-expanded="true"] .arrow{transform:rotate(90deg)}
+  .subj.empty-subj{opacity:.65}
+
+  .list{margin:0 0 14px;padding:0 0 0 4px;list-style:none}
+  .list a{
+    display:flex;align-items:baseline;gap:12px;padding:12px 14px;
+    border-left:2px solid var(--line-2);margin-left:14px;
+    text-decoration:none;color:var(--ink);
+  }
+  .list a:hover{border-left-color:var(--accent);background:var(--card-2)}
+  .list .t{flex:1;font-weight:500}
+  .list .n{display:block;color:var(--ink-3);font-size:12.5px;font-weight:400;margin-top:2px}
+  .list .d{color:var(--ink-3);font-size:13px;white-space:nowrap;font-variant-numeric:tabular-nums}
+
+  .howto{margin-top:30px}
+  .howto summary{cursor:pointer;color:var(--ink-2);font-size:14px}
+  .howto .card{margin-top:12px}
+  .howto code{background:var(--card-2);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:13px}
+  .howto ol{margin:0;padding-left:20px}
+  .howto li{margin-bottom:8px}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="index.html">Борд 15.27Д <span>· 3-й семестр</span></a>
+    <nav class="chips">
+      <a class="chip" href="index.html">Главная</a>
+      <a class="chip on" href="lectures.html">Лекции</a>
+      <a class="chip" href="party-control.html">Шоу</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="kicker">Конспекты группы</div>
+    <h1>Лекции</h1>
+    <p class="sub">Всё, что уже оцифровано, лежит здесь по предметам. Нажми на предмет — раскроется список его лекций.</p>
+  </div>
+
+  <div class="stat" id="stat"></div>
+
+  <div class="shelf" id="shelf"></div>
+
+  <details class="howto">
+    <summary>Как добавить лекцию</summary>
+    <div class="card pad">
+      <ol>
+        <li>Положить текст конспекта в папку <code>lectures/</code> файлом с латинским именем, например <code>statmodel-01.md</code>. Образец оформления — <a href="lecture.html?f=lectures/shablon.md">шаблон</a>.</li>
+        <li>Дописать одну строчку в файл <code>lectures.js</code> — там сверху объяснено, что в ней писать.</li>
+        <li>Закоммитить и запушить. Через минуту лекция появится на этой странице.</li>
+      </ol>
+      <p class="lede" style="margin:12px 0 0">Можно просто скинуть конспект — хоть текстом, хоть фотографиями доски — и попросить добавить.</p>
+    </div>
+  </details>
+
+  <a class="back" href="index.html">← Вернуться на главную</a>
+
+</div>
+
+<script src="data.js"></script>
+<script src="lectures.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var subjects = (window.BOARD && window.BOARD.subjects) || [];
+  var lectures = window.LECTURES || [];
+
+  function norm(s) {
+    return String(s || "").trim().toLowerCase();
+  }
+
+  function parseDate(d) {
+    var m = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(String(d || "").trim());
+    return m ? new Date(+m[3], +m[2] - 1, +m[1]).getTime() : 0;
+  }
+
+  function plural(n, one, few, many) {
+    var a = Math.abs(n) % 100, b = a % 10;
+    if (a > 10 && a < 20) return many;
+    if (b > 1 && b < 5) return few;
+    if (b === 1) return one;
+    return many;
+  }
+
+  // Раскладываем лекции по предметам. Предмет узнаём и по короткому
+  // названию, и по полному — чтобы в lectures.js можно было писать любое.
+  var shelves = subjects.map(function (s) {
+    return { name: s.short || s.name, full: s.name, items: [] };
+  });
+  var other = { name: "Разное", full: "Не привязано к предмету", items: [] };
+
+  lectures.forEach(function (lec) {
+    var key = norm(lec.subject);
+    var shelf = null;
+    for (var i = 0; i < subjects.length; i++) {
+      if (norm(subjects[i].short) === key || norm(subjects[i].name) === key) { shelf = shelves[i]; break; }
+    }
+    (shelf || other).items.push(lec);
+  });
+  if (other.items.length) shelves.push(other);
+
+  shelves.forEach(function (sh) {
+    sh.items.sort(function (a, b) { return parseDate(a.date) - parseDate(b.date); });
+  });
+
+  /* ------------------------------------------------------------- сводка */
+
+  var withLectures = shelves.filter(function (sh) { return sh.items.length; }).length;
+  document.getElementById("stat").innerHTML =
+    '<div class="box"><b>' + lectures.length + "</b><small>" +
+      plural(lectures.length, "лекция оцифрована", "лекции оцифровано", "лекций оцифровано") +
+    "</small></div>" +
+    '<div class="box"><b>' + withLectures + " из " + subjects.length + "</b><small>предметов начато</small></div>";
+
+  /* ------------------------------------------------------------- полки */
+
+  var shelfBox = document.getElementById("shelf");
+
+  shelves.forEach(function (sh, idx) {
+    var has = sh.items.length > 0;
+
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "subj" + (has ? " has" : " empty-subj");
+    btn.setAttribute("aria-expanded", "false");
+    btn.innerHTML =
+      '<span class="nm"><b></b><small></small></span>' +
+      '<span class="cnt"></span>' +
+      '<span class="arrow">›</span>';
+    btn.querySelector("b").textContent = sh.name;
+    btn.querySelector("small").textContent = sh.full !== sh.name ? sh.full : "";
+    btn.querySelector(".cnt").textContent = has
+      ? sh.items.length + " " + plural(sh.items.length, "лекция", "лекции", "лекций")
+      : "пока пусто";
+
+    var ul = document.createElement("ul");
+    ul.className = "list";
+    ul.hidden = true;
+    ul.id = "list-" + idx;
+    btn.setAttribute("aria-controls", ul.id);
+
+    if (!has) {
+      var li = document.createElement("li");
+      li.className = "empty";
+      li.style.padding = "10px 16px";
+      li.textContent = "Ни одной лекции пока не загружено.";
+      ul.appendChild(li);
+    } else {
+      sh.items.forEach(function (lec) {
+        var li = document.createElement("li");
+        var a = document.createElement("a");
+        a.href = "lecture.html?f=" + encodeURIComponent(lec.file);
+        a.innerHTML = '<span class="t"></span><span class="d"></span>';
+        var t = a.querySelector(".t");
+        t.textContent = lec.title || lec.file;
+        if (lec.note) {
+          var n = document.createElement("span");
+          n.className = "n";
+          n.textContent = lec.note;
+          t.appendChild(n);
+        }
+        a.querySelector(".d").textContent = lec.date || "";
+        li.appendChild(a);
+        ul.appendChild(li);
+      });
+    }
+
+    btn.addEventListener("click", function () {
+      var open = btn.getAttribute("aria-expanded") === "true";
+      btn.setAttribute("aria-expanded", String(!open));
+      ul.hidden = open;
+    });
+
+    shelfBox.appendChild(btn);
+    shelfBox.appendChild(ul);
+  });
+})();
+</script>
+</body>
+</html>

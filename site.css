@@ -1,0 +1,72 @@
+/* Общие стили новых страниц сайта (лекции и дальше).
+   Токены те же, что на главной, — чтобы сайт выглядел одним целым.
+   index.html держит свои стили внутри себя и этот файл не трогает. */
+
+:root{
+  --paper:#eef1f5; --card:#ffffff; --card-2:#f7f9fb;
+  --ink:#131923; --ink-2:#5a6676; --ink-3:#8a95a4;
+  --line:#dce1e9; --line-2:#c7cfda;
+  --accent:#2f5d8f; --accent-soft:#e4edf6; --accent-ink:#1d3f63;
+  --ok:#3c7a50; --ok-soft:#e2f0e6;
+  --warn:#9a6a12; --warn-soft:#f7edd8;
+  --shadow:0 1px 2px rgba(19,25,35,.06),0 8px 24px rgba(19,25,35,.05);
+  --display:'Unbounded','Golos Text',system-ui,sans-serif;
+  --body:'Golos Text',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0e131a; --card:#161d27; --card-2:#1b232e;
+  --ink:#e3e9f1; --ink-2:#98a4b4; --ink-3:#6d7988;
+  --line:#28313d; --line-2:#36414f;
+  --accent:#79a6d8; --accent-soft:#1a2836; --accent-ink:#a9c8e8;
+  --ok:#6db280; --ok-soft:#18271d;
+  --warn:#d3a351; --warn-soft:#2a2113;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 8px 24px rgba(0,0,0,.28);
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --paper:#0e131a; --card:#161d27; --card-2:#1b232e;
+  --ink:#e3e9f1; --ink-2:#98a4b4; --ink-3:#6d7988;
+  --line:#28313d; --line-2:#36414f;
+  --accent:#79a6d8; --accent-soft:#1a2836; --accent-ink:#a9c8e8;
+  --ok:#6db280; --ok-soft:#18271d;
+  --warn:#d3a351; --warn-soft:#2a2113;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 8px 24px rgba(0,0,0,.28);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;margin:0}
+img{max-width:100%;height:auto;border-radius:10px}
+[hidden]{display:none!important}
+a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:2px}
+h1,h2,h3{text-wrap:balance;margin:0}
+
+.wrap{max-width:1060px;margin:0 auto;padding-inline:16px;padding-block:0 64px}
+
+/* шапка — та же, что на главной */
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top-in{max-width:1060px;margin:0 auto;padding:10px 16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.brand{font-family:var(--display);font-weight:600;font-size:15px;letter-spacing:-.01em;margin-right:auto;color:var(--ink);text-decoration:none}
+.brand span{color:var(--ink-3);font-weight:400}
+nav.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:inherit;font-size:13px;padding:5px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--card);color:var(--ink-2);cursor:pointer;text-decoration:none;white-space:nowrap}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+:root[data-theme="dark"] .chip.on,:root:not([data-theme="light"]) .chip.on{color:#0e131a}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .chip.on{color:#fff}}
+
+/* заголовок страницы */
+.hero{padding-block:28px 6px}
+.kicker{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px}
+.hero h1{font-family:var(--display);font-size:clamp(22px,4vw,30px);letter-spacing:-.02em;line-height:1.2}
+.sub{color:var(--ink-2);margin:10px 0 0;max-width:62ch}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+.pad{padding:16px}
+.lede{color:var(--ink-2)}
+
+.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-2);text-decoration:none;margin-top:22px}
+.back:hover{color:var(--accent)}
+
+.empty{color:var(--ink-3);font-size:14px}

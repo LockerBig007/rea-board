@@ -32,15 +32,18 @@
   .subj.empty-subj{opacity:.65}
 
   .list{margin:0 0 14px;padding:0 0 0 4px;list-style:none}
-  .list a{
+  .list li{display:flex;align-items:stretch;margin-left:14px;border-left:2px solid var(--line-2)}
+  .list li:hover{border-left-color:var(--accent)}
+  .list li > a{
     display:flex;align-items:baseline;gap:12px;padding:12px 14px;
-    border-left:2px solid var(--line-2);margin-left:14px;
     text-decoration:none;color:var(--ink);
   }
-  .list a:hover{border-left-color:var(--accent);background:var(--card-2)}
+  .list li > a:first-child{flex:1;min-width:0}
+  .list li > a:hover{background:var(--card-2)}
   .list .t{flex:1;font-weight:500}
-  .list .n{display:block;color:var(--ink-3);font-size:12.5px;font-weight:400;margin-top:2px}
   .list .d{color:var(--ink-3);font-size:13px;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .list .dl{color:var(--ink-3);font-size:13px;white-space:nowrap;align-items:center}
+  .list .dl:hover{color:var(--accent)}
 
   .howto{margin-top:30px}
   .howto summary{cursor:pointer;color:var(--ink-2);font-size:14px}
@@ -179,20 +182,26 @@
       ul.appendChild(li);
     } else {
       sh.items.forEach(function (lec) {
+        // Готовая свёрстанная страница открывается как есть, конспект в .md —
+        // через читалку. Скачать можно и то и другое.
+        var ready = /\.html?$/i.test(lec.file);
+
         var li = document.createElement("li");
         var a = document.createElement("a");
-        a.href = "lecture.html?f=" + encodeURIComponent(lec.file);
+        a.href = ready ? lec.file : "lecture.html?f=" + encodeURIComponent(lec.file);
         a.innerHTML = '<span class="t"></span><span class="d"></span>';
-        var t = a.querySelector(".t");
-        t.textContent = lec.title || lec.file;
-        if (lec.note) {
-          var n = document.createElement("span");
-          n.className = "n";
-          n.textContent = lec.note;
-          t.appendChild(n);
-        }
+        a.querySelector(".t").textContent = lec.title || lec.file;
         a.querySelector(".d").textContent = lec.date || "";
         li.appendChild(a);
+
+        var dl = document.createElement("a");
+        dl.className = "dl";
+        dl.href = lec.file;
+        dl.setAttribute("download", "");
+        dl.textContent = "скачать";
+        dl.title = "Сохранить к себе: файл открывается и без интернета";
+        li.appendChild(dl);
+
         ul.appendChild(li);
       });
     }

@@ -135,16 +135,28 @@
   });
   if (other.items.length) shelves.push(other);
 
+  // Сводный конспект курса стоит первым, отдельные лекции — по датам.
   shelves.forEach(function (sh) {
-    sh.items.sort(function (a, b) { return parseDate(a.date) - parseDate(b.date); });
+    sh.items.sort(function (a, b) {
+      return (b.main ? 1 : 0) - (a.main ? 1 : 0) || parseDate(a.date) - parseDate(b.date);
+    });
   });
 
   /* ------------------------------------------------------------- сводка */
 
+  // В сводном конспекте лекций больше, чем строк в списке, поэтому считаем по
+  // его собственному числу, а не по количеству файлов.
+  function countLectures(sh) {
+    var main = null;
+    sh.items.forEach(function (x) { if (x.main && x.lectures) main = x; });
+    return main ? Math.max(main.lectures, sh.items.length - 1) : sh.items.length;
+  }
+
+  var total = shelves.reduce(function (n, sh) { return n + countLectures(sh); }, 0);
   var withLectures = shelves.filter(function (sh) { return sh.items.length; }).length;
   document.getElementById("stat").innerHTML =
-    '<div class="box"><b>' + lectures.length + "</b><small>" +
-      plural(lectures.length, "лекция оцифрована", "лекции оцифровано", "лекций оцифровано") +
+    '<div class="box"><b>' + total + "</b><small>" +
+      plural(total, "лекция оцифрована", "лекции оцифровано", "лекций оцифровано") +
     "</small></div>" +
     '<div class="box"><b>' + withLectures + " из " + subjects.length + "</b><small>предметов начато</small></div>";
 
@@ -164,8 +176,9 @@
       '<span class="cnt"></span>' +
       '<span class="arrow">›</span>';
     btn.querySelector("b").textContent = sh.name;
+    var n = countLectures(sh);
     btn.querySelector(".cnt").textContent = has
-      ? sh.items.length + " " + plural(sh.items.length, "лекция", "лекции", "лекций")
+      ? n + " " + plural(n, "лекция", "лекции", "лекций")
       : "пока пусто";
 
     var ul = document.createElement("ul");

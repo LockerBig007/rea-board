@@ -42,4 +42,6 @@ window.LECTURES = [
 
   { subject: "Статмоделирование", title: "Лекция 6. Этапы прогнозирования. Прогноз и классификация прогнозов", date: "02.10.2026", file: "lectures/statmodel-02-10.html", pdf: "lectures/statmodel-02-10.pdf" },
 
+  { subject: "Дискретная математика", title: "Формулы алгебры высказываний: тавтологии, равносильность, нормальные формы", date: "07.10.2026", file: "lectures/diskretka-07-10.html", pdf: "lectures/diskretka-07-10.pdf" },
+
 ];

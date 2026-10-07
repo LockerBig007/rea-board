@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Дискретная математика — лекция 07.10.26</title>
+<link rel="icon" href="https://lockerbig007.github.io/rea-board/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="https://lockerbig007.github.io/rea-board/icon-180.png">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Борд 15.27Д">
+<meta property="og:title" content="Дискретная математика — лекция 07.10.26">
+<meta property="og:image" content="https://lockerbig007.github.io/rea-board/preview.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://lockerbig007.github.io/rea-board/lectures/diskretka-07-10.html">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Serif:ital,wght@0,500;0,600;1,400&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+html{-webkit-text-size-adjust:100%}
+body{margin:0}
+img{max-width:100%}
+@page{margin:12mm}
+@media print{
+  body{background:#fff!important}
+  .wrap{max-width:none;padding-block:0 0}
+  header{padding-block:0 16px}
+  section{padding-block:20px 4px}
+  .tw,.math,.m,.box,.cex,.task,.answer,.rule,.given,.legend,.def,.callout,.tile{break-inside:avoid}
+  h1,h2,h3,caption{break-after:avoid}
+  footer{break-inside:avoid}
+  .tw{overflow:visible!important}
+}
+</style>
+</head>
+<body>
+<nav class="sitebar">
+  <a href="https://lockerbig007.github.io/rea-board/">Борд 15.27Д</a>
+  <a href="https://lockerbig007.github.io/rea-board/lectures.html">Все лекции</a>
+  <a class="get" href="https://lockerbig007.github.io/rea-board/lectures/diskretka-07-10.pdf" download>Скачать PDF</a>
+</nav>
+
+<style>
+/* Layout: growing lecture archive — sticky lecture nav, each lecture a dated block of definition cards and lists */
+:root{
+  --bg:#f4f6f4;
+  --surface:#ffffff;
+  --surface-2:#eceeeb;
+  --fg:#181d1c;
+  --muted:#5d6a66;
+  --line:#dde2de;
+  --line-strong:#b9bfb8;
+  --accent:#0f605b;
+  --accent-soft:#e0efec;
+  --mark:rgba(243,203,92,.55);
+  --new:#8a4a12;
+  --new-soft:#fbeedd;
+  --serif:"IBM Plex Serif",Georgia,"Times New Roman",serif;
+  --sans:"IBM Plex Sans","Segoe UI",Helvetica,Arial,sans-serif;
+  --mono:"IBM Plex Mono","SFMono-Regular",Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#13171a;--surface:#1b2023;--surface-2:#232a2e;--fg:#e7ece9;--muted:#98a49f;
+    --line:#2c3439;--line-strong:#434c52;--accent:#5ac8be;--accent-soft:#12332f;
+    --mark:rgba(214,169,58,.32);--new:#e3a76d;--new-soft:#33240f;color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#13171a;--surface:#1b2023;--surface-2:#232a2e;--fg:#e7ece9;--muted:#98a49f;
+  --line:#2c3439;--line-strong:#434c52;--accent:#5ac8be;--accent-soft:#12332f;
+  --mark:rgba(214,169,58,.32);--new:#e3a76d;--new-soft:#33240f;color-scheme:dark;
+}
+
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:16px;line-height:1.6;-webkit-text-size-adjust:100%}
+*{box-sizing:border-box}
+.wrap{max-width:840px;margin:0 auto;padding-inline:20px;padding-block:0 76px}
+
+.masthead{padding-block:40px 22px;border-bottom:2px solid var(--line-strong)}
+.kicker{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 12px}
+h1{font-family:var(--serif);font-weight:600;font-size:clamp(27px,5.6vw,40px);line-height:1.13;margin:0 0 14px;text-wrap:balance;letter-spacing:-.01em}
+.standfirst{margin:0;color:var(--muted);font-size:16.5px;max-width:60ch}
+.meta{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:18px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+
+nav{background:var(--bg);border-bottom:1px solid var(--line);margin-bottom:6px}
+.navscroll{display:flex;flex-wrap:wrap;gap:8px;padding-block:16px}
+nav a{font-family:var(--mono);font-size:12px;letter-spacing:.04em;text-decoration:none;color:var(--fg);border:1px solid var(--line-strong);border-radius:6px;padding:9px 14px;background:var(--surface);transition:color .15s,border-color .15s,background .15s}
+nav a:hover,nav a:focus-visible{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+nav a .nsub{display:block;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:3px}
+nav a.now{border-color:var(--new)}
+nav a.now .nsub{color:var(--new)}
+
+.lecture{padding-block:34px 6px;scroll-margin-top:16px}
+.lecture+.lecture{border-top:2px solid var(--line-strong)}
+.lhead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.ldate{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);border-radius:3px;padding:4px 9px}
+.ldate.new{color:var(--new);background:var(--new-soft)}
+h2{font-family:var(--serif);font-weight:600;font-size:clamp(22px,4vw,29px);line-height:1.22;margin:0;text-wrap:balance}
+.sublede{margin:8px 0 24px;color:var(--muted);font-size:15px;max-width:62ch}
+
+h3{font-family:var(--sans);font-weight:600;font-size:15.5px;margin:30px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+h4{font-family:var(--sans);font-weight:600;font-size:14.5px;margin:22px 0 10px;color:var(--accent)}
+p{margin:0 0 14px;max-width:66ch}
+
+.def{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:4px;padding:16px 18px;margin:0 0 20px}
+.def .term{font-family:var(--serif);font-weight:600;font-size:17px;display:block;margin-bottom:5px}
+.def p{margin:0}
+.def.key{border-left-color:var(--new);background:var(--new-soft)}
+.mark{background:linear-gradient(var(--mark),var(--mark));background-size:100% 62%;background-repeat:no-repeat;background-position:0 78%;padding:0 2px}
+
+ol.num{list-style:none;counter-reset:n;margin:0 0 22px;padding:0;display:grid;gap:10px}
+ol.num li{counter-increment:n;position:relative;padding-left:36px;max-width:64ch}
+ol.num li::before{content:counter(n);position:absolute;left:0;top:1px;width:24px;height:24px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-family:var(--mono);font-size:12px;font-weight:600;display:grid;place-items:center}
+ul.dash{list-style:none;margin:0 0 22px;padding:0;display:grid;gap:9px}
+ul.dash li{position:relative;padding-left:22px;max-width:64ch}
+ul.dash li::before{content:"";position:absolute;left:2px;top:12px;width:10px;height:1.5px;background:var(--accent)}
+
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(235px,1fr));margin:0 0 22px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:14px 16px;min-width:0}
+.tile .tlabel{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:6px}
+.tile p{margin:0;font-size:14.5px;line-height:1.5}
+
+.tw{overflow-x:auto;margin:0 0 22px;border:1px solid var(--line);border-radius:4px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{padding:10px 13px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{background:var(--surface-2);font-size:12px;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;white-space:nowrap}
+tbody tr:last-child td{border-bottom:none}
+td.who{font-weight:600;white-space:nowrap}
+
+.two{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));margin:0 0 22px}
+.col{background:var(--surface);border:1px solid var(--line);border-radius:5px;overflow:hidden;min-width:0}
+.col .ch{background:var(--surface-2);border-bottom:1px solid var(--line);padding:11px 16px;font-family:var(--serif);font-weight:600;font-size:16px}
+.col .cb{padding:14px 16px}
+.col .cb p:last-child,.col .cb ul:last-child{margin-bottom:0}
+.col .cb ul{margin:0;padding-left:18px;display:grid;gap:7px;font-size:14.5px}
+
+.todo{display:inline-block;font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--new);background:var(--new-soft);border:1px solid var(--new);border-radius:3px;padding:1px 6px;margin-left:6px;vertical-align:1px;white-space:nowrap}
+.unsure{background:linear-gradient(rgba(224,150,60,.3),rgba(224,150,60,.3));background-size:100% 100%;border-bottom:1.5px dashed var(--new);padding:0 2px}
+.openq{background:var(--new-soft);border:1px solid var(--new);border-radius:5px;padding:18px 20px;margin:0 0 20px}
+.openq h4{margin-top:0;color:var(--new)}
+.openq ol{margin:0;padding-left:20px;display:grid;gap:12px}
+.openq li{max-width:64ch}
+.openq .where{font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:3px}
+figure{margin:0 0 24px;background:var(--surface);border:1px solid var(--line);border-radius:5px;overflow:hidden}
+figure img{display:block;width:100%;height:auto}
+figure figcaption{padding:11px 15px;border-top:1px solid var(--line);font-size:13.5px;color:var(--muted);background:var(--surface-2)}
+figure figcaption b{color:var(--fg);font-weight:600}
+.callout{background:var(--accent-soft);border-radius:5px;padding:18px 20px;margin:0 0 22px}
+.callout p{margin:0;font-family:var(--serif);font-size:17px;line-height:1.45;max-width:58ch}
+.src{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.04em;margin:-12px 0 20px}
+
+footer{margin-top:44px;padding-top:20px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11.5px;color:var(--muted);line-height:1.8}
+@media (max-width:560px){.wrap{padding-inline:16px}.lecture{padding-block:28px 4px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+@media print{nav{display:none}.masthead{border-bottom-width:1px}}
+html{scroll-behavior:smooth}
+</style>
+<style>
+.f{font-family:var(--mono);font-size:.93em;white-space:nowrap}
+.fx{font-family:var(--mono);font-size:.93em;white-space:pre-wrap;line-height:1.9;
+    background:var(--surface-2);border:1px solid var(--line);border-radius:12px;
+    padding:14px 16px;margin:0 0 18px;overflow-x:auto}
+.fl{display:grid;grid-template-columns:auto 1fr;gap:9px 16px;margin:0 0 20px;align-items:baseline}
+.fl b{font-weight:600;color:var(--muted);font-family:var(--mono);font-size:.9em}
+.fl span{font-family:var(--mono);font-size:.93em}
+.fl i{display:block;font-family:var(--sans);font-style:normal;font-size:.82em;
+      color:var(--muted);margin-top:2px}
+@media (max-width:560px){.fl span,.fx,.f{font-size:.86em}}
+</style>
+<div class="wrap">
+<header class="masthead">
+  <p class="kicker">Дискретная математика · лекция 07.10.26</p>
+  <h1>Формулы алгебры высказываний: тавтологии, равносильность, нормальные формы</h1>
+  <p class="standfirst">Собрано по рукописному конспекту за 7 октября и странице учебника с теоремами 3.3 и 3.4; формулировки сверены со стандартным курсом математической логики. Места, где тетрадь читается неоднозначно или записана с ошибкой, не правились молча — они вынесены списком в конец.</p>
+  <div class="meta">
+    <span>14 основных тавтологий</span>
+    <span>7 выражений операций друг через друга</span>
+    <span>5 открытых вопросов</span>
+  </div>
+</header>
+
+<section class="lecture" id="dm-07-10">
+
+  <p class="sublede">Лекция о том, из чего состоит формула логики высказываний, какие формулы истинны всегда, когда две формулы считаются одинаковыми и как любую функцию записать в стандартном виде.</p>
+
+  <h3>Формула алгебры высказываний</h3>
+
+  <div class="def">
+    <span class="term">Пропозициональная переменная</span>
+    <p>Переменная, вместо которой можно подставить высказывание. Обозначается <span class="f">P</span>, <span class="f">Q</span>, <span class="f">R</span> или <span class="f">x₁, …, xₙ</span>.</p>
+  </div>
+
+  <p>Само понятие формулы задаётся индуктивно — тремя пунктами, последний из которых отсекает всё лишнее:</p>
+
+  <ol class="num">
+    <li>Всякая пропозициональная переменная — формула.</li>
+    <li>Если <span class="f">F</span> и <span class="f">H</span> — формулы, то <span class="f">¬F</span>, <span class="f">(F ∧ H)</span>, <span class="f">(F ∨ H)</span>, <span class="f">(F → H)</span>, <span class="f">(F ↔ H)</span> — тоже формулы.</li>
+    <li>Никаких формул, кроме построенных по пунктам 1 и 2, нет.</li>
+  </ol>
+
+  <p>Формулу записывают как <span class="f">F(x₁, x₂, …, xₙ)</span>. Если вместо переменных подставить конкретные высказывания <span class="f">A₁, …, Aₙ</span>, получится <span class="f">F(A₁, …, Aₙ)</span> — конкретизация формулы. У неё уже есть значение истинности, его обозначают <span class="f">λ(F)</span> и оно равно 0 или 1.</p>
+
+  <div class="callout">
+    <p>Третий пункт определения кажется формальностью, но именно он делает определение рабочим: без него нельзя было бы доказывать свойства формул индукцией по их построению.</p>
+  </div>
+
+  <h3>Четыре вида формул</h3>
+
+  <p>Всё дальнейшее крутится вокруг того, какие значения формула принимает на всех возможных наборах.</p>
+
+  <div class="grid">
+    <div class="tile"><span class="tlabel">Выполнима</span>Существует конкретизация, при которой формула истинна</div>
+    <div class="tile"><span class="tlabel">Тавтология</span>Истинна при любой конкретизации: <span class="f">F ≡ 1</span></div>
+    <div class="tile"><span class="tlabel">Опровержима</span>Существует конкретизация, при которой формула ложна</div>
+    <div class="tile"><span class="tlabel">Противоречие</span>Ложна при любой конкретизации: <span class="f">λ(F) ≡ 0</span></div>
+  </div>
+
+  <p>Пары связаны накрест, и это стоит держать в голове на экзамене:</p>
+
+  <ul class="dash">
+    <li>формула — тавтология тогда и только тогда, когда она <strong>не</strong> опровержима;</li>
+    <li>формула — противоречие тогда и только тогда, когда она <strong>не</strong> выполнима;</li>
+    <li>всякая тавтология выполнима, всякое противоречие опровержимо, обратное неверно.</li>
+  </ul>
+
+  <h3>Основные тавтологии</h3>
+
+  <p>Список из теоремы, записанный на лекции. У большинства пунктов есть собственное имя — его полезно знать, потому что в задачах на них ссылаются именно так.</p>
+
+  <div class="fl">
+    <b>а)</b><span>P ∨ ¬P<i>закон исключённого третьего</i></span>
+    <b>б)</b><span>¬(P ∧ ¬P)<i>закон противоречия</i></span>
+    <b>в)</b><span>¬¬P ↔ P<i>снятие двойного отрицания</i></span>
+    <b>г)</b><span>P → P<i>закон тождества</i></span>
+    <b>д)</b><span>(P → Q) ↔ (¬Q → ¬P)<i>закон контрапозиции</i></span>
+    <b>е)</b><span>((P → Q) ∧ (Q → R)) → (P → R)<i>транзитивность импликации, силлогизм</i></span>
+    <b>ж)</b><span>(P ↔ Q) ↔ (¬P ↔ ¬Q)</span>
+    <b>з)</b><span>P → (Q → P)<i>истина следует из чего угодно</i></span>
+    <b>и)</b><span>¬P → (P → Q)<i>из ложного следует что угодно</i></span>
+    <b>к)</b><span>(P ∧ (P → Q)) → Q<i>правило отделения, modus ponens</i></span>
+    <b>л)</b><span>((P → Q) ∧ ¬Q) → ¬P<i>modus tollens</i></span>
+    <b>м)</b><span>(P → (Q → R)) ↔ (Q → (P → R))<i>перестановка посылок</i></span>
+    <b>н)</b><span>(P → (Q → R)) ↔ ((P ∧ Q) → R)<i>закон экспортации</i></span>
+  </div>
+
+  <div class="callout">
+    <p>Пункт «л» в тетради записан так, что справа читается <span class="f">P</span>, а не <span class="f">¬P</span>. В таком виде это не тавтология: при ложных <span class="f">P</span> и <span class="f">Q</span> посылка истинна, а заключение ложно. Выше записан правильный вариант — он же классический modus tollens.</p>
+  </div>
+
+  <h3>Выражение одних операций через другие</h3>
+
+  <p>Со страницы учебника, теорема 3.4. Этим пользуются, когда формулу нужно привести к набору из двух-трёх операций — например, оставить только <span class="f">¬</span>, <span class="f">∧</span> и <span class="f">∨</span> перед построением нормальной формы.</p>
+
+  <div class="fx">(P → Q) ↔ (¬P ∨ Q)
+(P → Q) ↔ ¬(P ∧ ¬Q)
+(P ∧ Q) ↔ ¬(¬P ∨ ¬Q)
+(P ∧ Q) ↔ ¬(P → ¬Q)
+(P ∨ Q) ↔ ¬(¬P ∧ ¬Q)
+(P ∨ Q) ↔ (¬P → Q)
+(P ↔ Q) ↔ ((P → Q) ∧ (Q → P))</div>
+
+  <h3>Законы равносильности</h3>
+
+  <p>Записанные на лекции, с добавленными для полноты парными законами — в тетради половина пар записана одной строкой со сдвоенным значком <span class="f">∨/∧</span>.</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Закон</th><th>Формулировка</th></tr></thead>
+      <tbody>
+        <tr><td class="who">Идемпотентность</td><td><span class="f">(P ∧ P) ↔ P</span> &nbsp; <span class="f">(P ∨ P) ↔ P</span></td></tr>
+        <tr><td class="who">Коммутативность</td><td><span class="f">(P ∧ Q) ↔ (Q ∧ P)</span> &nbsp; <span class="f">(P ∨ Q) ↔ (Q ∨ P)</span></td></tr>
+        <tr><td class="who">Ассоциативность</td><td><span class="f">((P ∧ Q) ∧ R) ↔ (P ∧ (Q ∧ R))</span> &nbsp; то же для <span class="f">∨</span></td></tr>
+        <tr><td class="who">Дистрибутивность</td><td><span class="f">(P ∧ (Q ∨ R)) ↔ ((P ∧ Q) ∨ (P ∧ R))</span> &nbsp; то же с заменой <span class="f">∧</span> и <span class="f">∨</span></td></tr>
+        <tr><td class="who">Поглощение</td><td><span class="f">(P ∧ (P ∨ Q)) ↔ P</span> &nbsp; <span class="f">(P ∨ (P ∧ Q)) ↔ P</span></td></tr>
+        <tr><td class="who">Де Моргана</td><td><span class="f">¬(P ∧ Q) ↔ (¬P ∨ ¬Q)</span> &nbsp; <span class="f">¬(P ∨ Q) ↔ (¬P ∧ ¬Q)</span></td></tr>
+        <tr><td class="who">Ослабление</td><td><span class="f">P → (P ∨ Q)</span> &nbsp; <span class="f">(P ∧ Q) → P</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <p>Последняя строка в тетради записана как <span class="f">(P ∧ Q) ↔ P</span>. Равносильностью это не является: при истинном <span class="f">P</span> и ложном <span class="f">Q</span> левая часть ложна, а правая истинна. Верное утверждение — импликация в одну сторону, <span class="f">(P ∧ Q) → P</span>.</p>
+  </div>
+
+  <h3>Как получать новые тавтологии</h3>
+
+  <p>Два правила, которые позволяют не проверять каждую формулу таблицей истинности с нуля.</p>
+
+  <div class="def">
+    <span class="term">Правило заключения</span>
+    <p>Если <span class="f">F</span> и <span class="f">F → H</span> — тавтологии, то <span class="f">H</span> — тавтология. Это записанное в тетради <span class="f">F, F → H ⟹ H</span>.</p>
+  </div>
+
+  <div class="def">
+    <span class="term">Правило подстановки</span>
+    <p>Если <span class="f">F</span> — тавтология, то подстановка произвольной формулы вместо переменной — всюду, где эта переменная встречается, — снова даёт тавтологию.</p>
+  </div>
+
+  <h3>Равносильность формул</h3>
+
+  <div class="def key">
+    <span class="term">Равносильность</span>
+    <p>Формулы <span class="f">F</span> и <span class="f">H</span> равносильны, если на любом наборе значений переменных принимают одно и то же значение. Записывается <span class="f">F ≡ H</span>; в тетради использован значок <span class="f">≅</span>.</p>
+  </div>
+
+  <p>Главный критерий, через который равносильность сводится к уже изученному:</p>
+
+  <div class="fx">F ≡ H   ⟺   формула F ↔ H является тавтологией</div>
+
+  <p>Отсюда и теорема с лекции: отношение <span class="f">≡</span> — это отношение эквивалентности. Оно рефлексивно (<span class="f">F ≡ F</span>), симметрично (из <span class="f">F ≡ H</span> следует <span class="f">H ≡ F</span>) и транзитивно (из <span class="f">F ≡ H</span> и <span class="f">H ≡ G</span> следует <span class="f">F ≡ G</span>). Значит, все формулы разбиваются на классы равносильных, и внутри класса можно свободно заменять одну другой.</p>
+
+  <div class="callout">
+    <p>Не путать <span class="f">→</span> и <span class="f">≡</span>. Импликация <span class="f">F → H</span> — это формула, у неё есть таблица истинности. Равносильность <span class="f">F ≡ H</span> — это утверждение о двух формулах, оно либо верно, либо нет.</p>
+  </div>
+
+  <h3>Нормальные формы</h3>
+
+  <div class="two">
+    <div class="col">
+      <div class="ch">ДНФ</div>
+      <div class="cb"><p>Дизъюнктивная нормальная форма — дизъюнкция элементарных конъюнкций: <span class="f">(x ∧ ¬y) ∨ (¬x ∧ z)</span>.</p></div>
+    </div>
+    <div class="col">
+      <div class="ch">КНФ</div>
+      <div class="cb"><p>Конъюнктивная нормальная форма — конъюнкция элементарных дизъюнкций: <span class="f">(x ∨ ¬y) ∧ (¬x ∨ z)</span>.</p></div>
+    </div>
+  </div>
+
+  <p>Чтобы записать это коротко, вводится степень переменной — удобное обозначение, которое прячет отрицание в показатель:</p>
+
+  <div class="fx">x<sup>α</sup> = x,  если α = 1
+x<sup>α</sup> = ¬x, если α = 0</div>
+
+  <p>Из определения сразу следуют два свойства, на которых держится всё построение:</p>
+
+  <ul class="dash">
+    <li><span class="f">x<sup>α</sup> = 1</span> тогда и только тогда, когда <span class="f">x = α</span>;</li>
+    <li><span class="f">x<sup>α</sup> = 0</span> тогда и только тогда, когда <span class="f">x ≠ α</span>.</li>
+  </ul>
+
+  <p>То есть конъюнкция <span class="f">x₁<sup>B₁</sup> ∧ … ∧ xₙ<sup>Bₙ</sup></span> истинна ровно на одном наборе — на том самом <span class="f">(B₁, …, Bₙ)</span>. Это и есть ключ к разложению.</p>
+
+  <h4>Совершенные формы</h4>
+
+  <p>Нормальная форма называется совершенной, если в каждую конъюнкцию (или дизъюнкцию) каждая переменная входит ровно один раз — с отрицанием или без.</p>
+
+  <div class="def">
+    <span class="term">Теорема о СДНФ</span>
+    <p>Для любой формулы <span class="f">F ≢ 0</span> существует совершенная дизъюнктивная нормальная форма, и она единственна с точностью до порядка слагаемых.</p>
+  </div>
+
+  <p>Доказывается она леммой о разложении, записанной в тетради: функция равна дизъюнкции по всем наборам, где каждое слагаемое — значение функции на наборе, умноженное на конъюнкцию степеней.</p>
+
+  <div class="fx">F(x₁, …, xₙ) = ⋁ ( F(B₁, …, Bₙ) ∧ x₁<sup>B₁</sup> ∧ … ∧ xₙ<sup>Bₙ</sup> )</div>
+
+  <p>Слагаемые, где <span class="f">F(B₁, …, Bₙ) = 0</span>, обращаются в ноль и исчезают. Остаются ровно те наборы, на которых функция истинна, — отсюда и правило построения по таблице.</p>
+
+  <p>Для СКНФ всё двойственно: там степень определяется наоборот — <span class="f">x<sup>B</sup> = ¬x</span> при <span class="f">B = 1</span> и <span class="f">x</span> при <span class="f">B = 0</span>, а разложение идёт конъюнкцией по наборам, где функция ложна.</p>
+
+  <h4>Как строить по таблице истинности</h4>
+
+  <div class="two">
+    <div class="col">
+      <div class="ch">СДНФ — по единицам</div>
+      <div class="cb"><p>Взять строки, где <span class="f">F = 1</span>. В каждой составить конъюнкцию: переменная берётся как есть, если в строке стоит 1, и с отрицанием, если 0. Полученные конъюнкции соединить знаком <span class="f">∨</span>.</p></div>
+    </div>
+    <div class="col">
+      <div class="ch">СКНФ — по нулям</div>
+      <div class="cb"><p>Взять строки, где <span class="f">F = 0</span>. В каждой составить дизъюнкцию: переменная берётся с отрицанием, если в строке стоит 1, и как есть, если 0. Полученные дизъюнкции соединить знаком <span class="f">∧</span>.</p></div>
+    </div>
+  </div>
+
+  <p>Отрицания в двух случаях ставятся по противоположным правилам — это чаще всего и путают.</p>
+
+  <h4>Пример из тетради</h4>
+
+  <p>Записанная на лекции СДНФ для функции трёх переменных:</p>
+
+  <div class="fx">(¬x ∧ ¬y ∧ z) ∨ (¬x ∧ y ∧ z) ∨ (x ∧ ¬y ∧ z) ∨ (x ∧ y ∧ ¬z)</div>
+
+  <p>Читается она так: функция истинна на четырёх наборах — <span class="f">(0,0,1)</span>, <span class="f">(0,1,1)</span>, <span class="f">(1,0,1)</span> и <span class="f">(1,1,0)</span>. На остальных четырёх она ложна, и именно из них собиралась бы СКНФ — в тетради она начата, но не дописана.</p>
+
+</section>
+
+<section class="lecture" id="openq">
+
+  <h3>Что переспросить на паре</h3>
+
+  <p>Места, где рукопись читается неоднозначно или расходится с учебником. Я их не правил молча — записал, как есть, и отметил.</p>
+
+  <ol class="num">
+    <li><strong>Пункт «л» списка тавтологий.</strong> В тетради справа читается <span class="f">P</span>; тавтологией является <span class="f">¬P</span>. Описка или я неверно прочитал?</li>
+    <li><strong>Строка <span class="f">(P ∧ Q) ↔ P</span>.</strong> Как равносильность неверна, верна импликация <span class="f">(P ∧ Q) → P</span>. Записывалось ли это как равносильность или как следование?</li>
+    <li><strong>Пункт «в».</strong> В тетради <span class="f">¬¬R ↔ P</span> — две разные буквы. Скорее всего имелось в виду <span class="f">¬¬P ↔ P</span>.</li>
+    <li><strong>Значок равносильности.</strong> В тетради <span class="f">≅</span>, в учебнике обычно <span class="f">≡</span>. Какой писать в работах?</li>
+    <li><strong>Пример СДНФ.</strong> Дан без таблицы истинности, поэтому неизвестно, для какой функции он строился; СКНФ к нему не дописана. Нужно ли её достроить к следующему занятию?</li>
+  </ol>
+
+</section>
+
+<footer>
+  Источники: рукописный конспект за 07.10.2026 (5 страниц) и страница учебника с теоремами 3.3 и 3.4. Формулировки законов и алгоритмы построения совершенных форм сверены со стандартными курсами математической логики — МГУ, ТвГТУ, ТГУ.<br>
+  Шестая фотография из той же съёмки к лекции не относится и в конспект не вошла. РЭУ им. Г. В. Плеханова, ВШКМиС, 2 курс.
+</footer>
+
+</div>
+
+<style>
+/* Лист бумаги вместо бесконечной ленты: конспект читается как документ. */
+body{background:#e5e8e4}
+.sitebar{display:flex;gap:16px;flex-wrap:wrap;align-items:center;
+  max-width:794px;margin:0 auto;padding:14px 16px 10px;
+  font-family:var(--sans);font-size:13px}
+.sitebar a{color:var(--muted);text-decoration:none}
+.sitebar a:hover{color:var(--accent)}
+.sitebar .get{margin-left:auto;color:var(--accent);font-weight:500}
+
+.wrap.paged{max-width:none;padding:0}
+.pages{display:flex;flex-direction:column;align-items:center;gap:20px;padding-bottom:40px}
+.page{position:relative;width:794px;height:1122px;padding:60px 60px 72px;
+  background:var(--surface);border-radius:2px;
+  box-shadow:0 1px 3px rgba(24,29,28,.16),0 12px 30px rgba(24,29,28,.10)}
+.page.tall{height:auto;padding-bottom:72px}
+.page-num{position:absolute;left:0;right:0;bottom:26px;text-align:center;
+  font-family:var(--sans);font-size:11px;color:var(--muted)}
+.page > .page-body > :first-child{margin-top:0}
+
+/* На телефоне листы A4 нечитаемы — там обычная лента. */
+@media (max-width:899px){
+  body{background:var(--bg)}
+  .pages{gap:0;padding-bottom:0}
+  .page{width:auto;height:auto;padding:18px 16px;box-shadow:none;border-radius:0}
+  .page-num{display:none}
+  .sitebar{max-width:none}
+}
+
+@media print{
+  @page{size:A4;margin:0}
+  body{background:#fff}
+  .sitebar{display:none}
+  .pages{gap:0;padding:0}
+  .page{width:210mm;height:auto;min-height:0;padding:16mm 16mm 18mm;
+    box-shadow:none;border-radius:0;break-after:page}
+  .page:last-child{break-after:auto}
+}
+</style>
+
+<script>
+(function () {
+  "use strict";
+
+  // Лист A4 при 96 точках на дюйм — 1122 точки. В MAX_H заложен запас: без
+  // него лист, набитый под завязку, выдавливает в PDF лишнюю пустую страницу.
+  var MAX_H = 950;
+  var MIN_WIDTH = 900;
+
+  var wrap = document.querySelector(".wrap");
+  if (!wrap) return;
+  var original = Array.prototype.slice.call(wrap.children);
+
+  // Лекция, не поместившаяся на лист, продолжается на следующем такой же
+  // оболочкой <section>: без неё поехали бы отступы и стили заголовков.
+  function unpage() {
+    var pages = wrap.querySelector(".pages");
+    if (!pages) return;
+    original.forEach(function (el) {
+      if (el.shells) {
+        el.shells.forEach(function (shell) {
+          while (shell.firstChild) el.appendChild(shell.firstChild);
+        });
+        el.shells = null;
+      }
+      wrap.appendChild(el);
+    });
+    pages.remove();
+    wrap.classList.remove("paged");
+  }
+
+  function paginate() {
+    unpage();
+    if (document.documentElement.clientWidth < MIN_WIDTH) return;
+
+    var pages = document.createElement("div");
+    pages.className = "pages";
+    wrap.classList.add("paged");
+    wrap.appendChild(pages);
+
+    var body = null;
+
+    function newPage() {
+      var page = document.createElement("div");
+      page.className = "page";
+      body = document.createElement("div");
+      body.className = "page-body";
+      page.appendChild(body);
+      pages.appendChild(page);
+      return body;
+    }
+
+    function overflows() { return body.scrollHeight > MAX_H; }
+
+    newPage();
+
+    original.forEach(function (el) {
+      if (el.tagName !== "SECTION") {
+        body.appendChild(el);
+        if (overflows() && body.children.length > 1) {
+          body.removeChild(el);
+          newPage();
+          body.appendChild(el);
+        }
+        return;
+      }
+
+      // Каждая лекция начинается с нового листа, как глава в книге.
+      if (body.children.length) newPage();
+
+      var shells = [];
+      el.shells = shells;
+
+      function addShell(first) {
+        var shell = el.cloneNode(false);
+        if (!first) shell.removeAttribute("id");  // якорь — на первом листе лекции
+        shell.owner = el;
+        shells.push(shell);
+        return shell;
+      }
+
+      var shell = addShell(true);
+      body.appendChild(shell);
+
+      Array.prototype.slice.call(el.children).forEach(function (block) {
+        shell.appendChild(block);
+        if (!overflows()) return;
+        if (shell.children.length === 1) return; // блок сам выше листа — пусть будет
+        shell.removeChild(block);
+        shell = addShell(false);
+        newPage().appendChild(shell);
+        shell.appendChild(block);
+      });
+
+      el.remove(); // опустевшая исходная секция, иначе торчит пустой полосой
+    });
+
+    // Заголовок, оставшийся внизу листа без текста под ним, переносим дальше —
+    // но только внутри своей лекции, иначе он уедет в чужую.
+    Array.prototype.slice.call(pages.children).forEach(function (page, i, all) {
+      if (i === all.length - 1) return;
+      var host = page.querySelector(".page-body > section");
+      var next = all[i + 1].querySelector(".page-body > section");
+      if (!host || !next || host.owner !== next.owner) return;
+      var last = host.lastElementChild;
+      if (!last || !/^H[23]$/.test(last.tagName) || host.children.length < 2) return;
+      next.insertBefore(last, next.firstChild);
+    });
+
+    Array.prototype.slice.call(pages.children).forEach(function (page, i) {
+      if (page.firstChild.scrollHeight > MAX_H) page.classList.add("tall");
+      var num = document.createElement("div");
+      num.className = "page-num";
+      num.textContent = i + 1;
+      page.appendChild(num);
+    });
+  }
+
+  function run() {
+    // Шрифты меняют высоту текста, поэтому раскладываем после их загрузки.
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(paginate);
+    else paginate();
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", run);
+  else run();
+
+  var t;
+  window.addEventListener("resize", function () {
+    clearTimeout(t);
+    t = setTimeout(paginate, 250);
+  });
+})();
+</script>
+</body>
+</html>

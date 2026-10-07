@@ -252,6 +252,27 @@ def inline_images(html, base_dir):
     return re.sub(r'src="([^"]+)"', repl, html)
 
 
+def head_tags(title, page_name):
+    """Значок во вкладке и картинка, которую покажет Телеграм на ссылку.
+
+    Адреса абсолютные: файл скачивают и открывают с диска, относительные пути
+    там вести будет некуда.
+    """
+    return (
+        '<link rel="icon" href="%s/icon.svg" type="image/svg+xml">\n'
+        '<link rel="apple-touch-icon" href="%s/icon-180.png">\n'
+        '<meta property="og:type" content="article">\n'
+        '<meta property="og:site_name" content="Борд 15.27Д">\n'
+        '<meta property="og:title" content="%s">\n'
+        '<meta property="og:image" content="%s/preview.png">\n'
+        '<meta property="og:image:width" content="1200">\n'
+        '<meta property="og:image:height" content="630">\n'
+        '<meta property="og:url" content="%s/lectures/%s">\n'
+        '<meta name="twitter:card" content="summary_large_image">\n'
+        % (SITE, SITE, title.replace('"', "&quot;"), SITE, SITE, page_name)
+    )
+
+
 def sitebar(pdf_name):
     return (
         '<nav class="sitebar">\n'
@@ -303,6 +324,13 @@ def main():
     html = re.sub(r"<html\b([^>]*)>", r'<html\1 data-theme="light">', html, count=1)
 
     pdf_name = os.path.splitext(os.path.basename(dst))[0] + ".pdf"
+
+    m = re.search(r"<title>(.*?)</title>", html, re.S)
+    if m:
+        html = (html[:m.end()] + "\n"
+                + head_tags(m.group(1).strip(), os.path.basename(dst))
+                + html[m.end():])
+
     html = html.replace("<body>", "<body>\n" + sitebar(pdf_name), 1)
     html = html.replace("</body>", PAGE_CSS + PAGE_JS + "</body>", 1)
 

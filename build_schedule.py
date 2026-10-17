@@ -22,6 +22,28 @@ WEEKS = range(1, 19)  # 18 недель третьего семестра
 URL = "https://rasp.rea.ru/Schedule/ScheduleCard"
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data.js")
 
+# С октября 2026 rasp.rea.ru отвечает 403 на запрос без браузерного
+# User-Agent: по умолчанию requests представляется как python-requests/2.x,
+# и защита сайта такие запросы режет. Поэтому ходим как обычный браузер.
+# X-Requested-With обязателен: ScheduleCard — это AJAX-кусок страницы,
+# без него сайт отдаёт 404.
+HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36"
+    ),
+    "X-Requested-With": "XMLHttpRequest",
+    "Accept": "text/html, */*; q=0.01",
+    "Accept-Language": "ru-RU,ru;q=0.9",
+    "Referer": "https://rasp.rea.ru/",
+}
+
+# Ниже этих порогов ответ сайта считаем сбоем и data.js не переписываем:
+# в нём лежит учебный план и предметы, на которые завязаны полки лекций.
+MIN_DAYS = 40       # учебных дней в семестре заведомо больше
+KEEP_SHARE = 0.8    # и не меньше 80% от того, что уже лежит в data.js
+MIN_BOUND = 0.8     # доля занятий, опознанных по учебному плану
+
 # Учебный план третьего семестра: имя, короткое имя, форма контроля,
 # з.е., всего часов, контактных часов, лекций, практик, лабораторных.
 # Пар = контактные часы / 2 — на этом числе строится балл за посещение.
@@ -59,15 +81,14 @@ PAIR_RE = re.compile(
 TASK_RE = re.compile(r"class='task'.*?>(.*?)</a>", re.S)
 
 
-def fetch(week, tries=3):
+def fetch(week, session, tries=3):
     # Сайт вуза иногда не отвечает на подряд идущие запросы, поэтому повтор с паузой.
     last = None
     for attempt in range(tries):
         try:
-            r = requests.get(
+            r = session.get(
                 URL,
                 params={"selection": GROUP, "weekNum": week, "catfilter": 0},
-                headers={"X-Requested-With": "XMLHttpRequest"},
                 timeout=30,
             )
             r.raise_for_status()
@@ -116,11 +137,63 @@ def parse_week(page, week):
     return out
 
 
+def previous():
+    """Что лежит в data.js сейчас: (учебных дней, занятий).
+
+    Нужно, чтобы сравнить с тем, что пришло с сайта, и не заменить полное
+    расписание огрызком. Если файла нет или он битый — считаем, что пусто.
+    """
+    try:
+        with open(OUT, encoding="ascii") as fh:
+            text = fh.read()
+        payload = json.loads(text[text.index("{"):text.rindex("}") + 1])
+        days = payload.get("days", [])
+        return len(days), sum(len(d.get("s", [])) for d in days)
+    except (OSError, ValueError):
+        return 0, 0
+
+
+def check(days, had_days):
+    """Проверяет, что с сайта пришло целое расписание, а не остатки."""
+    floor = max(MIN_DAYS, int(had_days * KEEP_SHARE))
+    if len(days) < floor:
+        raise RuntimeError(
+            f"сайт отдал {len(days)} учебных дней, а ожидается хотя бы {floor}"
+        )
+    slots = [slot for day in days for slot in day["s"]]
+    bound = sum(1 for slot in slots if slot["i"] >= 0)
+    if not slots or bound < len(slots) * MIN_BOUND:
+        raise RuntimeError(
+            f"по учебному плану опознано {bound} занятий из {len(slots)} — "
+            "похоже, на сайте поменялась вёрстка или названия предметов"
+        )
+
+
+def write(payload):
+    """Пишет data.js через временный файл, чтобы не оставить его обрезанным."""
+    tmp = OUT + ".tmp"
+    body = "window.BOARD=" + json.dumps(payload, ensure_ascii=True, separators=(",", ":")) + ";"
+    # ensure_ascii=True не случайно: файл остаётся чистым ASCII и читается
+    # правильно даже там, где сервер не прислал charset=utf-8.
+    json.loads(body[len("window.BOARD="):-1])  # контроль: это валидный JSON
+    try:
+        with open(tmp, "w", encoding="ascii") as fh:
+            fh.write(body)
+        os.replace(tmp, OUT)
+    except BaseException:
+        if os.path.exists(tmp):
+            os.remove(tmp)
+        raise
+
+
 def main():
+    had_days, had_pairs = previous()
     index = {row[0]: i for i, row in enumerate(PLAN)}
     by_date = {}
+    session = requests.Session()
+    session.headers.update(HEADERS)
     for week in WEEKS:
-        for day in parse_week(fetch(week), week):
+        for day in parse_week(fetch(week, session), week):
             for slot in day["s"]:
                 i = index.get(slot["s"], -1)
                 slot["i"] = i
@@ -133,9 +206,7 @@ def main():
         return y, m, d
 
     days = sorted(by_date.values(), key=order)
-    if len(days) < 40:
-        print(f"Похоже на сбой: всего {len(days)} учебных дней, data.js не трогаю", file=sys.stderr)
-        return 1
+    check(days, had_days)
 
     payload = {
         "group": "15.27Д-С01/25б",
@@ -150,15 +221,20 @@ def main():
         ],
         "days": days,
     }
-    with open(OUT, "w", encoding="ascii") as fh:
-        # ensure_ascii=True не случайно: файл остаётся чистым ASCII и читается
-        # правильно даже там, где сервер не прислал charset=utf-8.
-        fh.write("window.BOARD=" + json.dumps(payload, ensure_ascii=True, separators=(",", ":")) + ";")
+    write(payload)
 
     pairs = sum(len(d["s"]) for d in days)
-    print(f"data.js обновлён: {len(days)} учебных дней, {pairs} занятий")
+    print(f"data.js обновлён: {len(days)} учебных дней, {pairs} занятий "
+          f"(было {had_days} и {had_pairs})")
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    # Любой сбой источника — это понятная строка в логе и ненулевой код выхода,
+    # а не трассировка. data.js при этом остаётся прежним: сайт продолжает
+    # показывать расписание прошлой недели, а прогон в Actions горит красным.
+    try:
+        sys.exit(main())
+    except RuntimeError as e:
+        print(f"Расписание не обновлено, data.js не тронут: {e}", file=sys.stderr)
+        sys.exit(1)

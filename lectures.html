@@ -54,6 +54,7 @@
   .list li > a:hover{background:var(--card-2)}
   .list .t{flex:1;font-weight:500}
   .list .d{color:var(--ink-3);font-size:13px;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .list .kind{font-size:11px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:3px 9px}
   .list .dl{color:var(--ink-3);font-size:13px;white-space:nowrap;align-items:center}
   .list .dl:hover{color:var(--accent)}
 
@@ -147,10 +148,13 @@
   });
   if (other.items.length) shelves.push(other);
 
-  // Сводный конспект курса стоит первым, отдельные лекции — по датам.
+  // Сводный конспект курса стоит первым, отдельные лекции — по датам,
+  // материалы к зачёту и прочее не из курса лекций — в конце.
   shelves.forEach(function (sh) {
     sh.items.sort(function (a, b) {
-      return (b.main ? 1 : 0) - (a.main ? 1 : 0) || parseDate(a.date) - parseDate(b.date);
+      return (a.kind ? 1 : 0) - (b.kind ? 1 : 0)
+        || (b.main ? 1 : 0) - (a.main ? 1 : 0)
+        || parseDate(a.date) - parseDate(b.date);
     });
   });
 
@@ -159,9 +163,19 @@
   // В сводном конспекте лекций больше, чем строк в списке, поэтому считаем по
   // его собственному числу, а не по количеству файлов.
   function countLectures(sh) {
-    var main = null;
-    sh.items.forEach(function (x) { if (x.main && x.lectures) main = x; });
-    return main ? Math.max(main.lectures, sh.items.length - 1) : sh.items.length;
+    var main = null, n = 0;
+    sh.items.forEach(function (x) {
+      if (x.kind) return;              // зачёт и прочие материалы — не лекции
+      n++;
+      if (x.main && x.lectures) main = x;
+    });
+    return main ? Math.max(main.lectures, n - 1) : n;
+  }
+
+  function countMaterials(sh) {
+    var n = 0;
+    sh.items.forEach(function (x) { if (x.kind) n++; });
+    return n;
   }
 
   var total = shelves.reduce(function (n, sh) { return n + countLectures(sh); }, 0);
@@ -188,10 +202,10 @@
       '<span class="cnt"></span>' +
       '<span class="arrow">›</span>';
     btn.querySelector("b").textContent = sh.name;
-    var n = countLectures(sh);
-    btn.querySelector(".cnt").textContent = has
-      ? n + " " + plural(n, "лекция", "лекции", "лекций")
-      : "пока пусто";
+    var n = countLectures(sh), nm = countMaterials(sh), parts = [];
+    if (n) parts.push(n + " " + plural(n, "лекция", "лекции", "лекций"));
+    if (nm) parts.push(nm + " " + plural(nm, "материал", "материала", "материалов"));
+    btn.querySelector(".cnt").textContent = parts.length ? parts.join(" · ") : "пока пусто";
 
     var ul = document.createElement("ul");
     ul.className = "list";
@@ -214,8 +228,11 @@
         var li = document.createElement("li");
         var a = document.createElement("a");
         a.href = direct ? lec.file : "lecture.html?f=" + encodeURIComponent(lec.file);
-        a.innerHTML = '<span class="t"></span><span class="d"></span>';
+        a.innerHTML = '<span class="t"></span>' +
+          (lec.kind ? '<span class="kind"></span>' : "") +
+          '<span class="d"></span>';
         a.querySelector(".t").textContent = lec.title || lec.file;
+        if (lec.kind) a.querySelector(".kind").textContent = lec.kind;
         a.querySelector(".d").textContent = lec.date || "";
         li.appendChild(a);
 

@@ -114,6 +114,14 @@
   var subjects = (window.BOARD && window.BOARD.subjects) || [];
   var lectures = window.LECTURES || [];
 
+  // Полки для предметов не из расписания этого семестра — например, курсов
+  // прошлых лет. Их задают в lectures.js, data.js собирается расписанием и
+  // руками не правится. В счётчике «предметов начато» они не участвуют.
+  var extra = (window.EXTRA_SUBJECTS || []).map(function (s) {
+    return { name: s.short || s.name, full: s.name, short: s.short || s.name, extra: true };
+  });
+  var all = subjects.concat(extra);
+
   function norm(s) {
     return String(s || "").trim().toLowerCase();
   }
@@ -133,7 +141,7 @@
 
   // Раскладываем лекции по предметам. Предмет узнаём и по короткому
   // названию, и по полному — чтобы в lectures.js можно было писать любое.
-  var shelves = subjects.map(function (s) {
+  var shelves = all.map(function (s) {
     return { name: s.short || s.name, full: s.name, items: [] };
   });
   var other = { name: "Разное", full: "Не привязано к предмету", items: [] };
@@ -141,8 +149,8 @@
   lectures.forEach(function (lec) {
     var key = norm(lec.subject);
     var shelf = null;
-    for (var i = 0; i < subjects.length; i++) {
-      if (norm(subjects[i].short) === key || norm(subjects[i].name) === key) { shelf = shelves[i]; break; }
+    for (var i = 0; i < all.length; i++) {
+      if (norm(all[i].short) === key || norm(all[i].name) === key) { shelf = shelves[i]; break; }
     }
     (shelf || other).items.push(lec);
   });
@@ -179,7 +187,10 @@
   }
 
   var total = shelves.reduce(function (n, sh) { return n + countLectures(sh); }, 0);
-  var withLectures = shelves.filter(function (sh) { return sh.items.length; }).length;
+  // Считаем только предметы этого семестра: полки прошлых курсов и «Разное»
+  // в знаменатель не входят, иначе получилось бы «12 из 11».
+  var withLectures = shelves.slice(0, subjects.length)
+    .filter(function (sh) { return sh.items.length; }).length;
   document.getElementById("stat").innerHTML =
     '<div class="box"><b>' + total + "</b><small>" +
       plural(total, "лекция оцифрована", "лекции оцифровано", "лекций оцифровано") +

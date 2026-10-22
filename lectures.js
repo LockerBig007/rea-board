@@ -39,7 +39,17 @@
  *   python build_lecture.py "путь/к/конспекту.html" lectures/имя.html
  */
 
+// Предметы не из расписания этого семестра: курсы прошлых лет, для которых
+// есть материалы. Появляются на странице отдельной полкой.
+window.EXTRA_SUBJECTS = [
+  { name: "Статистика (1 курс)", short: "Статистика" },
+];
+
 window.LECTURES = [
+
+  { subject: "Статистика", title: "Первый курс", date: "22.10.2026", file: "lectures/statistika-1-kurs.html", pdf: "lectures/statistika-1-kurs.pdf", main: true, lectures: 12 },
+
+  { subject: "Статистика", title: "Тренажёр формул: 150 карточек", date: "22.10.2026", file: "lectures/statistika-trenazher.html", kind: "тренажёр" },
 
   { subject: "Статмоделирование", title: "Конспект курса, лекции 1–6", date: "02.10.2026", file: "lectures/statmodel.html", pdf: "lectures/statmodel.pdf", main: true, lectures: 6 },
 
